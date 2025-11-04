@@ -1,5 +1,8 @@
 import {useFormStatus} from "react-dom"
+
+
 import GoogleLoginButton from "./GoogleLoginButton"
+
 
 const SubmitButtonStatus = ()=>{
     const {pending} = useFormStatus()
@@ -27,8 +30,13 @@ const RegisterForm = ()=>{
             headers:{
                 'Content-Type': 'application/json',
             },
+            'credentials': 'include',
             body: JSON.stringify(formData)
         })
+        const data = await response.json()
+        if(data.access){
+            localStorage.setItem('access', data.access)
+        }
     }
 
     return(

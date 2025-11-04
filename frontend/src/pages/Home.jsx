@@ -3,10 +3,21 @@ import { AuthContext } from "../context/AuthContext"
 import '../css/navbar.css'
 
 const Home = ()=>{
-    const {accessToken, setAccessToken, login, logout} = useContext(AuthContext);
+    const accessToken = localStorage.getItem('access')
 
     if(accessToken){
-        //User is already logged in.
+        return(
+            <>
+            <div className="navbar">
+                <div className="title">
+                    <p>Django Job Board</p>
+                </div>
+                <div className="auth-related">
+                    <button>Logout</button>
+                </div>
+            </div>
+            </>
+        )
 
     }else{
         return(
