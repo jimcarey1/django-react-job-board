@@ -1,5 +1,3 @@
-import { useContext, useState } from "react"
-import { AuthContext } from "../context/AuthContext"
 import '../css/navbar.css'
 
 const Home = ()=>{
