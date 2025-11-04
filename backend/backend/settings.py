@@ -26,6 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-f%04nig__k0e1vd4-8nq8vpl-1ve#d+z-2o-vtzy-3b&2pia26'
+SALT = 'HGIOEWG83U83T9I39jf3i3ut9mgm[gnoij(&(*&*&*^gjrgnkaioj@$#$%^&8tu383hthgiogheih38hg'
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -140,12 +141,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite default, change for prod
 ]
 CORS_ALLOW_CREDENTIALS = True  # if you use httpOnly cookies
-
-
-
-# Cookie settings if you set the refresh token in cookie:
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
 
 
