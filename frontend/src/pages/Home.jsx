@@ -1,3 +1,4 @@
+import {Link} from 'react-router-dom'
 import '../css/navbar.css'
 
 const Home = ()=>{
@@ -25,8 +26,12 @@ const Home = ()=>{
                     <p>Django Job Board</p>
                 </div>
                 <div className="auth-related">
-                    <button className="register">Register</button>
-                    <button className="login">Login</button>
+                    <Link to="/register">
+                        <button className="register">Register</button>
+                    </Link>
+                    <Link to="/login">
+                        <button className="login">Login</button>
+                    </Link>
                 </div>
             </div>
             </>
