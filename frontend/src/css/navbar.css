@@ -48,3 +48,18 @@ button.register, button.login {
 button.register:hover, button.login:hover {
   background-color: #0056b3;
 }
+
+button.logout{
+  background-color: #007bff;
+  color: white;
+  font: bold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.bi-person-circle{
+  font-size: xx-large;
+  cursor: pointer;
+}

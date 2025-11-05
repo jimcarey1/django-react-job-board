@@ -23,7 +23,8 @@ const RegisterForm = ()=>{
         formData = {
             "email" : formData.get('email'),
             "password" : formData.get('password'),
-            "confirm_password" : formData.get('confirm_password')
+            "first_name" : formData.get('first'),
+            "last_name" : formData.get('last'),
         }
         const response = await fetch('http://localhost:8000/api/auth/register', {
             method: 'POST',

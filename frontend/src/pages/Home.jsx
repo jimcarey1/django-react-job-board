@@ -12,7 +12,10 @@ const Home = ()=>{
                     <p>Django Job Board</p>
                 </div>
                 <div className="auth-related">
-                    <button>Logout</button>
+                    <button className="logout">Logout</button>
+                    <div className="profile">
+                        <i className="bi bi-person-circle"></i>
+                    </div>
                 </div>
             </div>
             </>
