@@ -21,6 +21,7 @@ const LoginForm = ()=>{
         console.log(email, password)
         const loggedIn = await login({email, password})
         if(loggedIn){
+            location.href = '/'
             console.log('User logged in successfully')
         }
     }

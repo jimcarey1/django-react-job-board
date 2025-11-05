@@ -2,10 +2,8 @@
 import React, { useContext } from "react";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext"
 
 export default function GoogleLoginButton() {
-  const { setAccessToken } = useContext(AuthContext);
 
   return (
     <GoogleLogin
@@ -17,9 +15,8 @@ export default function GoogleLoginButton() {
         // send to backend for verification and to get our JWTs
         const res = await axios.post("http://localhost:8000/api/auth/google/", { id_token }, { withCredentials: true });
         if (res.data.access) {
-          setAccessToken(res.data.access);
-          // if backend returns refresh in json (not cookie):
-          if (res.data.refresh) localStorage.setItem("refresh", res.data.refresh);
+          localStorage.setItem('access_token', res.data.access)
+          location.href = '/'
         } else {
           console.error("Google login failed on backend");
         }

@@ -36,12 +36,15 @@ const RegisterForm = ()=>{
         const data = await response.json()
         if(data.access){
             localStorage.setItem('access', data.access)
+            location.href = '/'
         }
     }
 
     return(
         <form action={formAction}>
             <input type="email" name="email" placeholder="email..." required/>
+            <input type="text" name="first" placeholder="First Name..." required/>
+            <input type="text" name="last" placeholder="Last Name..." required/>
             <input type="password" name="password" placeholder="***********" required/>
             <input type="password" name="confirm_password" placeholder="***********" required/>
             <SubmitButtonStatus/>
