@@ -31,11 +31,6 @@ button.register, button.login{
     font: bolder;
 }
 
-.dropdown-container {
-  position: relative;
-  display: inline-block;
-}
-
 button.register, button.login {
   background-color: #007bff;
   color: white;

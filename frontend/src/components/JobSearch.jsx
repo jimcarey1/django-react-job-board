@@ -12,7 +12,7 @@ const JobSearch = ()=>{
                 <i className="bi bi-geo-alt"></i>
                 <input type="text" placeholder="Location" name="location" required />
             </div>
-            <button>Find Jobs</button>
+            <button className="find-jobs">Find Jobs</button>
         </div>
         </>
     )

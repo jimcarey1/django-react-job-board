@@ -40,7 +40,7 @@
   border-radius: 25px;
 }
 
-button {
+button.find-jobs {
   background: #0a66c2;
   color: white;
   border: none;
@@ -51,6 +51,6 @@ button {
   transition: background 0.3s;
 }
 
-button:hover {
+button.find-jobs:hover {
   background: #004182;
 }
