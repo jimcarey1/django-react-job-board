@@ -9,7 +9,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 
 createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId='258088388347-o1gp9ofno79k658bheoltk68tut7n794.apps.googleusercontent.com'>
+  <GoogleOAuthProvider clientId='GOOGLE_CLIENT_ID'>
     <AuthProvider>
       <BrowserRouter>
         <App />
