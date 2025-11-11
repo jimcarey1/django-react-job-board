@@ -19,7 +19,8 @@ User = get_user_model()
 class RegisterIn(Schema):
     email: str
     password: str
-    confirm_password: str
+    first_name: str
+    last_name: str
 
 class LoginIn(Schema):
     email: str
@@ -33,9 +34,9 @@ def register(request: HttpRequest, data: RegisterIn):
     response = Response('Response object')
     if User.objects.filter(email=data.email).exists():
         raise HttpError(status_code=400, message='A User with this email already exists.')
-    user = User.objects.create_user(email=data.email, password=data.password)
+    user = User.objects.create_user(email=data.email, password=data.password, first_name=data.first_name, last_name=data.last_name)
     refresh = RefreshToken.for_user(user)
-    response.set_signed_cookie('refresh_token', str(refresh), settings.SALT)
+    response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
     return {"access": str(refresh.access_token)}
 
 @router.post("/login")
@@ -45,7 +46,7 @@ def login(request: HttpRequest, data: LoginIn):
         raise HttpError(status_code=400, message='Invalid credentials.')
     refresh = RefreshToken.for_user(user)
     response = Response({"access": str(refresh.access_token)})
-    response.set_signed_cookie('refresh_token', str(refresh), settings.SALT)
+    response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
     return response
 
 # Google social login: frontend sends id_token (from Google Identity)
@@ -59,16 +60,21 @@ def google_login(request: HttpRequest, data:GoogleTokenIn):
         idinfo = google_id_token.verify_oauth2_token(data.id_token, google_requests.Request(), settings.GOOGLE_CLIENT_ID)
         # idinfo contains email, sub (user id), name, picture...
         email = idinfo.get("email")
+        first_name = idinfo.get('given_name')
+        last_name = idinfo.get('family_name')
         if not email:
             raise Exception("No email in ID token")
-        user, created = User.objects.get_or_create(email=email)
+        user, created = User.objects.get_or_create(email=email, first_name=first_name, last_name=last_name)
         # Optionally set other fields if created
         refresh = RefreshToken.for_user(user)
-        return {"access": str(refresh.access_token), "refresh": str(refresh)}
+        response = Response({"access": str(refresh.access_token)})
+        response.status_code = 200
+        response.set_signed_cookie('refresh_token', refresh, settings.SALT, max_age=7*24*60*60)
+        return response
     except Exception as e:
-        print(e)
         # token invalid or verification failed
-        return {"access": "", "refresh": None}
+        raise HttpError(status_code=500, message=str(e))
+
 
 
 @router.post('/access_token', response=TokenOut)
@@ -80,10 +86,13 @@ def new_access_token(request: HttpRequest, data:TokenOut):
         pass
     except Exception as e:
         raise HttpError(status_code=400, message='Invalid Access Token')
-    print(payload)
-    refresh_token:RefreshToken = request.COOKIES.get('refresh_token')
+    refresh_token:str = request.get_signed_cookie('refresh_token', salt=settings.SALT)
     if not refresh_token:
         raise HttpError(status_code=400, message='no refresh token, you are logged out.')
-    return {'access': refresh_token.access_token}
+    try:
+        refresh_token = RefreshToken(refresh_token)
+        return {'access': str(refresh_token.access_token)}
+    except Exception as e:
+        return HttpError(status_code=400, message=str(e))
 
 
