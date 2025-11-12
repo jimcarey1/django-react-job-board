@@ -1,16 +1,18 @@
 from ninja import Router, Schema 
 from ninja.responses import Response
 from ninja.errors import HttpError
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse
 from django.contrib.auth import get_user_model
 from typing import Optional
 from datetime import datetime
 from django.conf import settings
+from asgiref.sync import sync_to_async
 
 import jwt
 
 from .models import EMPLOYMENT_TYPE, LOCATION, LOCATION_TYPE
 from .models import Experience
+from .utils import fetch_skills_from_the_db
 
 
 router = Router()
@@ -72,3 +74,10 @@ async def add_experience(request: HttpRequest, data: AddExperience):
         experience.end_date = end_date_object
     await experience.asave()
     return {"status" : "successfull"}
+
+@router.get('/skills')
+async def get_skills(request: HttpRequest):
+    skills = await sync_to_async(fetch_skills_from_the_db)()
+    response = JsonResponse({"skills":skills})
+    response.status_code = 200
+    return response
