@@ -63,6 +63,12 @@ button.experience-button, button.skill-button{
     gap: 20px;
 }
 
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .field{
     display: flex;
     flex-direction: column;
