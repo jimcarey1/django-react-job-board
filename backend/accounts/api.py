@@ -96,3 +96,14 @@ def new_access_token(request: HttpRequest, data:TokenOut):
         return HttpError(status_code=400, message=str(e))
 
 
+@router.get('/logout')
+async def logout(request: HttpRequest):
+    try:
+        response = Response({"message": "logout successfull"})
+        response.delete_cookie('refresh_token', path='/')
+        response.status_code = 200
+        return response
+    except Exception as e:
+        response = Response({"message" : "logout failed", "reason": str(e)})
+        response.status_code = 500
+        return response
