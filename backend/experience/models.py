@@ -3,8 +3,14 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+SKILL_TYPE = (
+    ('Soft Skills', 'Soft Skills'),
+    ('Technical Skills', 'Technical Skills'),
+)
+
 class Skill(models.Model):
     name = models.CharField(unique=True, max_length=100)
+    skill_type = models.CharField(choices=SKILL_TYPE, blank=True)
 
 EMPLOYMENT_TYPE = (
     ('Software Engineer', 'Software Engineer'),
