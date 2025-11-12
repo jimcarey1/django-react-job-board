@@ -23,8 +23,18 @@ export function AuthProvider({ children }) {
     return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.clear()
+    const response = await fetch('http://localhost:8000/api/auth/logout', {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if(response.ok){
+      const data = await response.json()
+      if(!data.reason){
+        console.log(data)
+      }
+    }
   };
 
   return <AuthContext.Provider value={{ login, logout }}>{children}</AuthContext.Provider>;
