@@ -51,3 +51,21 @@ export async function fetchLocation(){
         return null
     }
 }
+
+export async function fetchSkills(){
+    try{
+        const response = await fetch('http://localhost:8000/api/experience/skills', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        if(response.ok){
+            const data = await response.json()
+            if(data.skills){
+                return data.skills
+            }
+        }
+    }catch(error){
+        console.log(error)
+        return null
+    }
+}
