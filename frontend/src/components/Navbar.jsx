@@ -1,5 +1,10 @@
+import { useContext } from "react"
+import { AuthContext } from "../context/AuthContext"
+import { Link } from "react-router-dom"
+
 
 const Navbar = ()=>{
+    const {logout} = useContext(AuthContext)
     const accessToken = localStorage.getItem('access')
 
     if(accessToken){
@@ -10,7 +15,7 @@ const Navbar = ()=>{
                     <p>Django Job Board</p>
                 </div>
                 <div className="auth-related">
-                    <button className="logout">Logout</button>
+                    <button className="logout" onClick={logout}>Logout</button>
                     <div className="profile">
                         <i className="bi bi-person-circle"></i>
                     </div>
