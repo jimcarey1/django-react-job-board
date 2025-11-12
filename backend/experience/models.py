@@ -3,9 +3,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
-from month.models import MonthField
-
 class Skill(models.Model):
     name = models.CharField(unique=True, max_length=100)
 
@@ -58,7 +55,7 @@ class Experience(models.Model):
     currently_working = models.BooleanField()
     location = models.CharField(max_length=50, choices=LOCATION)
     location_type = models.CharField(max_length=10, choices=LOCATION_TYPE)
-    Description = models.TextField()
+    description = models.TextField()
     skills = models.ManyToManyField(Skill)
     employee = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -75,8 +72,9 @@ COURSE_TYPES = (
 class Education(models.Model):
     course = models.CharField(max_length=100, choices=COURSE_TYPES)
     college = models.CharField(max_length=100)
-    starting_time = MonthField()
-    ending_time = MonthField()
+    starting_time = models.DateField(blank=False, null=False)
+    ending_time = models.DateField(blank=True, null=True)
+    currently_working = models.BooleanField(default=False)
     CGPA = models.DecimalField(max_digits=3, decimal_places=2)
     Achievements = models.TextField()
     student = models.ForeignKey(User, on_delete=models.CASCADE)
