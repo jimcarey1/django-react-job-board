@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import CreatableSelect from 'react-select/creatable'
 
 import '../css/addexperience.css'
-import { fetchEmploymentType, fetchLocationType, fetchLocation } from '../services/experience';
+import { fetchEmploymentType, fetchLocationType, fetchLocation, fetchSkills } from '../services/experience';
 
+const justSkillNames = (skills)=>{
+    const skillNames = skills.map((skill)=>({'value': skill.name, 'label': skill.name}))
+    return skillNames
+}
 
 const CustomYearSelector = ({name, disabled})=>{
   const currentYear = new Date().getFullYear();
@@ -65,31 +70,39 @@ const AddExperience = () =>{
     const [employmentType, setEmploymentType] = useState(JSON.parse(localStorage.getItem('employmentType')) || [])
     const [locationType, setLocationType] = useState(JSON.parse(localStorage.getItem('locationType')) || [])
     const [location, setLocation] = useState(JSON.parse(localStorage.getItem('location')) || [])
+    const [skills, setSkills] = useState(JSON.parse(localStorage.getItem('skills')) || [])
+    const [filteredSkills, setFilteredSkills] = useState(justSkillNames(skills))
 
     const [currentlyWorking, setCurrentlyWorking] = useState(false);
 
     const modalRef = useRef(null)
 
+
     useEffect(()=>{
         const setEverythingOnce = async ()=>{
-            const employ_type = await fetchEmploymentType()
-            const loc_type = await fetchLocationType()
-            const loc = await fetchLocation()
+            const employment_type = await fetchEmploymentType()
+            const location_type = await fetchLocationType()
+            const location_ = await fetchLocation()
+            const skills_ = await fetchSkills()
 
-            if(employ_type && employmentType.length === 0){
-                localStorage.setItem('employmentType', JSON.stringify(employ_type))
+            if(employment_type && employmentType.length === 0){
+                localStorage.setItem('employmentType', JSON.stringify(employment_type))
                 setEmploymentType(employ_type)
             }
-            if(loc_type && locationType.length === 0){
-                localStorage.setItem('locationType', JSON.stringify(loc_type))
-                setLocationType(loc_type)
+            if(location_type && locationType.length === 0){
+                localStorage.setItem('locationType', JSON.stringify(location_type))
+                setLocationType(location_type)
             }
-            if(loc && location.length === 0){
-                localStorage.setItem('location', JSON.stringify(loc))
-                setLocation(loc)
+            if(location_ && location.length === 0){
+                localStorage.setItem('location', JSON.stringify(location_))
+                setLocation(location)
+            }
+            if(skills_ && skills.length === 0){
+                localStorage.setItem('skills', JSON.stringify(skills_))
+                setSkills(skills_)
             }
         }
-        if(employmentType.length === 0 && locationType.length === 0 && location.length === 0){
+        if(employmentType.length === 0 || locationType.length === 0 || location.length === 0 || skills.length == 0){
             setEverythingOnce()
         }
     }, [])
@@ -105,6 +118,13 @@ const AddExperience = () =>{
     const handleCurrentlyWorkingChange = ()=>{
         setCurrentlyWorking((prev)=> !prev)
     }
+
+    const handleCloseButton = ()=>{
+        if(modalRef.current){
+            modalRef.current.style.display = 'none'
+        }
+    }
+
 
     const formAction = async (formData)=>{
         const startMonth = formData.get('start-month')
@@ -148,12 +168,6 @@ const AddExperience = () =>{
         }
     }
 
-    const handleCloseButton = ()=>{
-        if(modalRef.current){
-            modalRef.current.style.display = 'none'
-        }
-    }
-
     return (
         <>
         <div className="add-experience">
@@ -194,13 +208,13 @@ const AddExperience = () =>{
                         </select>
                     </div>
 
-                    <div className='field' id='company'>
+                    <div className='field' id='company-field'>
                         <label htmlFor='company'>Company or Organization*</label>
                         <input type='text' name='company' id='company' required placeholder='Google'></input>
                     </div>
 
                     <div className='field' id='currently-working-field'>
-                        <input type='checkbox' name='currently-working' onChange={handleCurrentlyWorkingChange} required></input>
+                        <input type='checkbox' name='currently-working' required></input>
                         <p>I am currently working in this role.</p>
                     </div>
 
@@ -220,7 +234,7 @@ const AddExperience = () =>{
                         </div>
                     </div>
 
-                    <div className='field' id='location'>
+                    <div className='field' id='location-field'>
                         <label htmlFor='location'>Location*</label>
                         <select name='location' id='location'>
                             {location.map((loc, index) => (
@@ -229,7 +243,7 @@ const AddExperience = () =>{
                         </select>
                     </div>
 
-                    <div className='field' id='location-type'>
+                    <div className='field' id='location-type-field'>
                         <label htmlFor='location-type'>Location type*</label>
                         <select name='location-type' id='location-type'>
                             {locationType.map((type_, index) => (
@@ -238,7 +252,12 @@ const AddExperience = () =>{
                         </select>
                     </div>
 
-                    <div className='field' id='description'>
+                    <div className='field' id='skills-field'>
+                        <label htmlFor='skills'>Skills*</label>
+                        <CreatableSelect isClearable isMulti options={filteredSkills}/>
+                    </div>
+
+                    <div className='field' id='description-field'>
                         <label>Description*</label>
                         <textarea name='description' rows={5}></textarea>
                     </div>
