@@ -37,6 +37,7 @@ def register(request: HttpRequest, data: RegisterIn):
     user = User.objects.create_user(email=data.email, password=data.password, first_name=data.first_name, last_name=data.last_name)
     refresh = RefreshToken.for_user(user)
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
+    request.user = user
     return {"access": str(refresh.access_token)}
 
 @router.post("/login")
@@ -47,6 +48,7 @@ def login(request: HttpRequest, data: LoginIn):
     refresh = RefreshToken.for_user(user)
     response = Response({"access": str(refresh.access_token)})
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
+    request.user = user
     return response
 
 # Google social login: frontend sends id_token (from Google Identity)
@@ -70,6 +72,7 @@ def google_login(request: HttpRequest, data:GoogleTokenIn):
         response = Response({"access": str(refresh.access_token)})
         response.status_code = 200
         response.set_signed_cookie('refresh_token', refresh, settings.SALT, max_age=7*24*60*60)
+        request.user = user
         return response
     except Exception as e:
         # token invalid or verification failed
