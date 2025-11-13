@@ -11,6 +11,7 @@ SKILL_TYPE = (
 class Skill(models.Model):
     name = models.CharField(unique=True, max_length=100)
     skill_type = models.CharField(choices=SKILL_TYPE, blank=True)
+    users = models.ManyToManyField(User, related_name="skills", blank=True)
 
 EMPLOYMENT_TYPE = (
     ('Software Engineer', 'Software Engineer'),
