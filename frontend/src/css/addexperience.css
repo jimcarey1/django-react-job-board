@@ -109,3 +109,26 @@ input[type="checkbox"]{
     font-size: 32px;
     cursor: pointer;
 }
+
+.skill-form{
+    display: none;
+}
+
+.add-skill-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-skill-button{
+    padding: 5px 25px;
+    border-radius: 15px;
+    border: none;
+    background-color: aqua;
+    font-weight: bolder;
+}
+
+#add-skill{
+    width: 200px;
+    height: 25px;
+}
