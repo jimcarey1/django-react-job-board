@@ -13,7 +13,7 @@ import jwt
 
 from .models import EMPLOYMENT_TYPE, LOCATION, LOCATION_TYPE
 from .models import Experience, Skill
-from .utils import fetch_skills_from_the_db, async_iter
+from .utils import fetch_skills_from_the_db, async_iter, convert_model_to_dict
 
 
 router = Router()
@@ -30,6 +30,9 @@ class AddExperience(Schema):
     start_date : str
     end_date : Optional[str]
     skills : List[str]
+
+class AddSkill(Schema):
+    name : str
 
 
 
@@ -76,9 +79,7 @@ async def add_experience(request: HttpRequest, data: AddExperience):
         experience.end_date = end_date_object
     await experience.asave()
     async for skill in async_iter(data.skills):
-        skill_obj = await Skill.objects.aget_or_create(name=skill, skill_type='Technical Skills')
-        #aget_or_create returns a tuple where the first element is our ORM object.
-        skill_obj = skill_obj[0]
+        skill_obj, created = await Skill.objects.aget_or_create(name=skill, skill_type='Technical Skills')
         await experience.skills.aadd(skill_obj.id)
     return {"status" : "successfull"}
 
@@ -86,5 +87,31 @@ async def add_experience(request: HttpRequest, data: AddExperience):
 async def get_skills(request: HttpRequest):
     skills = await sync_to_async(fetch_skills_from_the_db)()
     response = JsonResponse({"skills":skills})
+    response.status_code = 200
+    return response
+
+
+@router.post('/add-skill')
+async def add_skill(request: HttpRequest, data:AddSkill):
+    access_token = request.headers.get('Authorization')
+    if access_token:
+        access_token = access_token.split(' ')[1]
+    try:
+        payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError as e:
+        response = Response({"status" : "error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    except jwt.InvalidTokenError as e:
+        response = Response({"status" : "error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    user_id = payload.get('user_id')
+    user = await User.objects.aget(id=user_id)
+    skill_name = data.name
+    skill, created = await Skill.objects.aget_or_create(name=skill_name, skill_type='Technical Skills')
+    await skill.users.aadd(user)
+    skill_dict = await sync_to_async(convert_model_to_dict)(skill)
+    response = Response({"skill" : skill_dict})
     response.status_code = 200
     return response
