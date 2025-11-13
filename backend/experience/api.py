@@ -3,16 +3,17 @@ from ninja.responses import Response
 from ninja.errors import HttpError
 from django.http import HttpRequest, JsonResponse
 from django.contrib.auth import get_user_model
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from django.conf import settings
 from asgiref.sync import sync_to_async
 
+
 import jwt
 
 from .models import EMPLOYMENT_TYPE, LOCATION, LOCATION_TYPE
-from .models import Experience
-from .utils import fetch_skills_from_the_db
+from .models import Experience, Skill
+from .utils import fetch_skills_from_the_db, async_iter
 
 
 router = Router()
@@ -28,6 +29,7 @@ class AddExperience(Schema):
     currently_working : str
     start_date : str
     end_date : Optional[str]
+    skills : List[str]
 
 
 
@@ -73,6 +75,11 @@ async def add_experience(request: HttpRequest, data: AddExperience):
         end_date_object = datetime.strptime(end_date, "%Y-%m-%d")
         experience.end_date = end_date_object
     await experience.asave()
+    async for skill in async_iter(data.skills):
+        skill_obj = await Skill.objects.aget_or_create(name=skill, skill_type='Technical Skills')
+        #aget_or_create returns a tuple where the first element is our ORM object.
+        skill_obj = skill_obj[0]
+        await experience.skills.aadd(skill_obj.id)
     return {"status" : "successfull"}
 
 @router.get('/skills')
