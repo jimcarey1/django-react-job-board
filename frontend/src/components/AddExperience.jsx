@@ -71,11 +71,14 @@ const AddExperience = () =>{
     const [locationType, setLocationType] = useState(JSON.parse(localStorage.getItem('locationType')) || [])
     const [location, setLocation] = useState(JSON.parse(localStorage.getItem('location')) || [])
     const [skills, setSkills] = useState(JSON.parse(localStorage.getItem('skills')) || [])
-    const [filteredSkills, setFilteredSkills] = useState(justSkillNames(skills))
+    const [selectedOptions, setSelectedOptions] = useState([]);
 
     const [currentlyWorking, setCurrentlyWorking] = useState(false);
 
     const modalRef = useRef(null)
+
+    //A value derived from the state.
+    const filteredSkills = justSkillNames(skills)
 
 
     useEffect(()=>{
@@ -125,6 +128,10 @@ const AddExperience = () =>{
         }
     }
 
+    const addSkillToSelectedOptions = (selected)=>{
+        setSelectedOptions(selected)
+    }
+
 
     const formAction = async (formData)=>{
         const startMonth = formData.get('start-month')
@@ -145,6 +152,7 @@ const AddExperience = () =>{
             "description" : formData.get('description'),
             "currently_working" : formData.get('currently-working'),
             "start_date" : startDate,
+            "skills" : selectedOptions.map((skill)=>skill.value),
             "end_date" : null,
         }
 
@@ -165,6 +173,7 @@ const AddExperience = () =>{
         const data = await response.json()
         if(data.status){
             console.log(data.status)
+            modalRef.current.style = 'none'
         }
     }
 
@@ -214,7 +223,7 @@ const AddExperience = () =>{
                     </div>
 
                     <div className='field' id='currently-working-field'>
-                        <input type='checkbox' name='currently-working' required></input>
+                        <input type='checkbox' name='currently-working' onChange={handleCurrentlyWorkingChange} required></input>
                         <p>I am currently working in this role.</p>
                     </div>
 
@@ -254,7 +263,16 @@ const AddExperience = () =>{
 
                     <div className='field' id='skills-field'>
                         <label htmlFor='skills'>Skills*</label>
-                        <CreatableSelect isClearable isMulti options={filteredSkills}/>
+                        <CreatableSelect 
+                            id='skills' 
+                            name='skills' 
+                            required 
+                            isClearable 
+                            isMulti 
+                            options={filteredSkills}
+                            value={selectedOptions}
+                            onChange={addSkillToSelectedOptions}
+                        />
                     </div>
 
                     <div className='field' id='description-field'>
