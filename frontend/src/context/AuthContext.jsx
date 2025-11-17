@@ -4,6 +4,8 @@ import React, { createContext, useState } from "react";
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [user, setUser] = useState({})
+
   const login = async ({ email, password }) => {
     const res = await fetch("http://localhost:8000/api/auth/login",{
       method: 'POST',
@@ -15,8 +17,9 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json()
     console.log(data)
-    if (data.access) {
+    if (data.access && data.user) {
       localStorage.setItem('access', data.access)
+      setUser(data.user)
       //We are storing the refresh token in the cookies.
       return true;
     }

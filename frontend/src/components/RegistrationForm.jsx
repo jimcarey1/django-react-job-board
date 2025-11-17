@@ -1,7 +1,9 @@
 import {useFormStatus} from "react-dom"
+import { useContext } from "react"
 
 
 import GoogleLoginButton from "./GoogleLoginButton"
+import { AuthContext } from "../context/AuthContext"
 
 
 const SubmitButtonStatus = ()=>{
@@ -14,6 +16,7 @@ const SubmitButtonStatus = ()=>{
 } 
 
 const RegisterForm = ()=>{
+    const {setUser} = useContext(AuthContext)
     const formAction = async (formData)=>{
         const password = formData.get('password');
         const confirmPassword = formData.get('confirm_password')
@@ -35,8 +38,9 @@ const RegisterForm = ()=>{
             body: JSON.stringify(formData)
         })
         const data = await response.json()
-        if(data.access){
+        if(data.access && data.user){
             localStorage.setItem('access', data.access)
+            setUser(data.user)
             location.href = '/'
         }
     }
