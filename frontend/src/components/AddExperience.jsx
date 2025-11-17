@@ -93,7 +93,7 @@ const AddExperience = () =>{
 
             if(employment_type && employmentType.length === 0){
                 localStorage.setItem('employmentType', JSON.stringify(employment_type))
-                setEmploymentType(employ_type)
+                setEmploymentType(employment_type)
             }
             if(location_type && locationType.length === 0){
                 localStorage.setItem('locationType', JSON.stringify(location_type))
@@ -125,7 +125,6 @@ const AddExperience = () =>{
             if(response.ok){
                 const data = await response.json()
                 setUserExperiences(data.userExperiences)
-                console.log(data.userExperiences)
             }
             setLoading(false)
         }
