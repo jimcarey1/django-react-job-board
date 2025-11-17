@@ -13,7 +13,7 @@ import jwt
 
 from .models import EMPLOYMENT_TYPE, LOCATION, LOCATION_TYPE
 from .models import Experience, Skill
-from .utils import fetch_skills_from_the_db, async_iter, convert_model_to_dict
+from .utils import fetch_skills_from_the_db, async_iter, convert_model_to_dict, fetch_user_experiences_from_the_db, fetch_user_skills
 
 
 router = Router()
@@ -115,3 +115,29 @@ async def add_skill(request: HttpRequest, data:AddSkill):
     response = Response({"skill" : skill_dict})
     response.status_code = 200
     return response
+
+@router.get('/check-experience')
+async def check_user_experience(request: HttpRequest):
+    access_token = request.headers.get('Authorization')
+    if access_token:
+        access_token = access_token.split(' ')[1]
+    
+    try:
+        payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError as e:
+        response = Response({"status":"error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    except jwt.InvalidTokenError as e:
+        response = Response({"status":"error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    user_id = payload.get('user_id')
+    user = await User.objects.aget(id=user_id)
+    user_experiences = await sync_to_async(fetch_user_experiences_from_the_db)(user)
+    for experience in user_experiences:
+        start_date:datetime.date = experience.get('start_date')
+        start_date = start_date.strftime("%b %Y")
+        experience.update({'start_date':start_date})
+    return ({"userExperiences":user_experiences})
+    
