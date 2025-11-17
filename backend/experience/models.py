@@ -64,7 +64,7 @@ class Experience(models.Model):
     location_type = models.CharField(max_length=10, choices=LOCATION_TYPE)
     description = models.TextField()
     skills = models.ManyToManyField(Skill)
-    employee = models.ForeignKey(User, on_delete=models.CASCADE)
+    employee = models.ForeignKey(User, related_name='experiences', on_delete=models.CASCADE)
 
 
 
