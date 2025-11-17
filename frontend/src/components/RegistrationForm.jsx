@@ -40,6 +40,7 @@ const RegisterForm = ()=>{
         const data = await response.json()
         if(data.access && data.user){
             localStorage.setItem('access', data.access)
+            localStorage.setItem('user', JSON.stringify(data.user))
             setUser(data.user)
             location.href = '/'
         }

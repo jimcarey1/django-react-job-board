@@ -4,7 +4,10 @@ import React, { createContext, useState } from "react";
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState({})
+  const [user, setUser] = useState(()=>{
+    const saved = localStorage.getItem('user')
+    return saved ? JSON.parse(saved) : null 
+  })
 
   const login = async ({ email, password }) => {
     const res = await fetch("http://localhost:8000/api/auth/login",{
@@ -19,6 +22,7 @@ export function AuthProvider({ children }) {
     console.log(data)
     if (data.access && data.user) {
       localStorage.setItem('access', data.access)
+      localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
       //We are storing the refresh token in the cookies.
       return true;
@@ -40,5 +44,5 @@ export function AuthProvider({ children }) {
     }
   };
 
-  return <AuthContext.Provider value={{ login, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ login, logout, user, setUser }}>{children}</AuthContext.Provider>;
 }
