@@ -140,4 +140,25 @@ async def check_user_experience(request: HttpRequest):
         start_date = start_date.strftime("%b %Y")
         experience.update({'start_date':start_date})
     return ({"userExperiences":user_experiences})
+
+@router.get('/check-skills')
+async def get_user_skills(request:HttpRequest):
+    access_token = request.headers.get('Authorization')
+    if access_token:
+        access_token = access_token.split(' ')[1]
+    
+    try:
+        payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError as e:
+        response = Response({"status":"error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    except jwt.InvalidTokenError as e:
+        response = Response({"status":"error", "reason":str(e)})
+        response.status_code = 401
+        return response
+    user_id = payload.get('user_id')
+    user = await User.objects.aget(id=user_id)
+    user_skills = await sync_to_async(fetch_user_skills)(user)
+    return {"userSkills" : user_skills}
     
