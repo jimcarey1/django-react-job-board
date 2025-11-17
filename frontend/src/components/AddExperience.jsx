@@ -72,13 +72,16 @@ const AddExperience = () =>{
     const [location, setLocation] = useState(JSON.parse(localStorage.getItem('location')) || [])
     const [skills, setSkills] = useState(JSON.parse(localStorage.getItem('skills')) || [])
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [loading, setLoading] = useState(true)
 
     const [currentlyWorking, setCurrentlyWorking] = useState(false);
+    const [userExperiences, setUserExperiences] = useState([])
 
     const modalRef = useRef(null)
 
     //A value derived from the state.
     const filteredSkills = justSkillNames(skills)
+    const accessToken = localStorage.getItem('access') || null
 
 
     useEffect(()=>{
@@ -108,6 +111,25 @@ const AddExperience = () =>{
         if(employmentType.length === 0 || locationType.length === 0 || location.length === 0 || skills.length == 0){
             setEverythingOnce()
         }
+    }, [])
+
+    useEffect(()=>{
+        const fetchUserExperience = async ()=>{
+            const response = await fetch('http://localhost:8000/api/experience/check-experience', {
+                method: 'GET',
+                headers:{
+                    'Authorization' : `Bearer ${accessToken}`
+                },
+                credentials: 'include'
+            })
+            if(response.ok){
+                const data = await response.json()
+                setUserExperiences(data.userExperiences)
+                console.log(data.userExperiences)
+            }
+            setLoading(false)
+        }
+        fetchUserExperience()
     }, [])
 
     const handleAddExperience = ()=>{
@@ -179,23 +201,60 @@ const AddExperience = () =>{
 
     return (
         <>
-        <div className="add-experience">
-            <div>
-                <p className="heading">Experience</p>
-                <p className="desc">Adding experience improves your chance of getting a job.</p>
-            </div>
-            <div className="job">
-                <i className="bi bi-bag-fill"></i>
-                <div className="job-details">
-                    <p>Job Title</p>
-                    <p>Organization</p>
-                    <p>Achievements</p>
+        {loading && <p>Loading ...</p>}
+
+        {(userExperiences.length === 0 ) && !loading &&
+            <div className="add-experience">
+                <div>
+                    <p className="heading">Experience</p>
+                    <span className="desc">Adding experience improves your chance of getting a job.</span>
+                </div>
+                <div className="job">
+                    <i className="bi bi-bag-fill"></i>
+                    <div className="job-details">
+                        <p>Job Title</p>
+                        <p>Organization</p>
+                        <p>Achievements</p>
+                    </div>
+                </div>
+                <div>
+                    <button onClick={handleAddExperience} className="experience-button">Add Experience</button>
                 </div>
             </div>
-            <div>
-                <button onClick={handleAddExperience} className="experience-button">Add Experience</button>
+        }
+
+        {userExperiences.length > 0 && !loading &&
+            <div className='list-jobs'>
+                {userExperiences.map((experience)=>(
+                    <div key={experience.id} className='users-job' id={experience.id}>
+                        <div className='company-icon'>
+                            <i className="bi bi-bag-fill"></i>
+                        </div>
+                        <div className='job-details'>
+                            <div className='job-name'>
+                                <span>{experience.title}</span>
+                            </div>
+                            <div className='company-name'>
+                                <span>{experience.company}</span>
+                                <span>Full time</span>
+                            </div>
+                            <div className='job-duration'>
+                                <p>{experience.start_date}</p>
+                                <span>-</span>
+                                {experience.end_date && <p>{experience.end_date}</p>}
+                                {!experience.end_date && <p>Present</p>}
+                            </div>
+                            <div className='job-location'>
+                                <span>{experience.location}, India . {experience.location_type}</span>
+                            </div>
+                            <div className='job-description'>
+                                <p>{experience.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
-        </div>
+        }
 
         <div className='modal' id='popup' ref={modalRef}>
             <div className='modal-heading'>
@@ -223,7 +282,7 @@ const AddExperience = () =>{
                     </div>
 
                     <div className='field' id='currently-working-field'>
-                        <input type='checkbox' name='currently-working' onChange={handleCurrentlyWorkingChange} required></input>
+                        <input type='checkbox' name='currently-working' onChange={handleCurrentlyWorkingChange}></input>
                         <p>I am currently working in this role.</p>
                     </div>
 
