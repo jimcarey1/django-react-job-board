@@ -110,6 +110,41 @@ input[type="checkbox"]{
     cursor: pointer;
 }
 
+.users-job{
+    display: flex;
+    gap: 10px;
+}
+
+.company-icon{
+    padding-top: 15px;
+}
+
+.job-details{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.job-name{
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+.company-name{
+    display: flex;
+    gap: 10px;
+    color: rgba(0, 0, 0, 0.764);
+}
+
+.job-duration{
+    display: flex;
+    gap: 10px;
+}
+
+.job-location, .job-description{
+    color: rgba(0, 0, 0, 0.408);
+}
+
 .skill-form{
     display: none;
 }
@@ -131,4 +166,16 @@ input[type="checkbox"]{
 #add-skill{
     width: 200px;
     height: 25px;
+}
+
+.skill-abc{
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+    font-weight: 200;
+    align-items: center;
+}
+
+.bi-trash{
+    color: red;
 }
