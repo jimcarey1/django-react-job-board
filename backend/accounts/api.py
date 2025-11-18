@@ -5,7 +5,7 @@ from ninja.errors import HttpError
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model, aauthenticate
 from django.forms import model_to_dict
-from ninja_jwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
