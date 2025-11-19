@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'accounts',
     'experience',
+    'pages',
 
     'ninja',
     'ninja_jwt',
