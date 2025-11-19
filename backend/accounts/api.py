@@ -91,7 +91,7 @@ async def google_login(request: HttpRequest, data:GoogleTokenIn):
 async def new_access_token(request: HttpRequest, data:TokenOut):
     access_token = data.access
     try:
-        payload = jwt.decode(access_token, settings.NINJA_JWT['SIGNING_KEY'], settings.NINJA_JWT['ALGORITHM'], options={'verify_exp':False})
+        payload = jwt.decode(access_token, settings.SIMPLE_JWT['SIGNING_KEY'], settings.SIMPLE_JWT['ALGORITHM'], options={'verify_exp':False})
     except Exception as e:
         raise HttpError(status_code=400, message='Invalid Access Token')
     refresh_token:str = request.get_signed_cookie('refresh_token', salt=settings.SALT)
