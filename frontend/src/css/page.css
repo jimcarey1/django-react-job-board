@@ -1,0 +1,54 @@
+.company-page{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px;
+}
+
+.company-page .company-info-card{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.basic-details .title > span{
+    font-weight: bolder;
+    font-size: 25px;
+}
+
+.basic-details .details > span{
+    color: rgba(0, 0, 0, 0.623);
+    font-size: 14px;
+}
+
+.company-info-card .networking{
+    display: flex;
+    gap: 20px;
+}
+
+.follow-button{
+    padding: 6px 30px;
+    background-color: rgba(0, 0, 255, 0.692);
+    border: none;
+    border-radius: 35px;
+    color: white;
+    font-weight: bolder;
+    font-size: 14px;
+}
+
+.learn-more{
+    padding: 6px 15px;
+    background-color: white;
+    color: blue;
+    font-weight: bolder;
+    border-radius: 20px;
+    border: 1px solid blue;
+}
+
+.company-info-card .navbar-section{
+    display: flex;
+    gap: 30px;
+    font-size: 18px;
+    font-weight: bolder;
+    color: rgba(0, 0, 0, 0.572);
+}
