@@ -52,3 +52,24 @@
     font-weight: bolder;
     color: rgba(0, 0, 0, 0.572);
 }
+
+.company-page .company-overview{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.company-overview .overview-heading{
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.company-overview .overview-description{
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.308);
+}
+
+.company-overview .show-details{
+    align-self: center;
+}
