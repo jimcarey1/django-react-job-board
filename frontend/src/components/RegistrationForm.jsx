@@ -1,22 +1,28 @@
 import {useFormStatus} from "react-dom"
 import { useContext } from "react"
+import { useNavigate } from "react-router-dom"
 
 
 import GoogleLoginButton from "./GoogleLoginButton"
 import { AuthContext } from "../context/AuthContext"
+import '../css/register.css'
 
 
 const SubmitButtonStatus = ()=>{
     const {pending} = useFormStatus()
     return(
         <>
-        <button disabled={pending}>{pending ? 'Submitting...' : 'Submit'}</button>
+        <button className="register-button" disabled={pending}>{pending ? 'Submitting...' : 'Submit'}</button>
         </>
     )
 } 
 
 const RegisterForm = ()=>{
-    const {setUser} = useContext(AuthContext)
+    const {user, setUser} = useContext(AuthContext)
+    const navigate = useNavigate()
+    if(user){
+        navigate('-1', {replace: true})
+    }
     const formAction = async (formData)=>{
         const password = formData.get('password');
         const confirmPassword = formData.get('confirm_password')
@@ -47,15 +53,33 @@ const RegisterForm = ()=>{
     }
 
     return(
-        <form action={formAction}>
-            <input type="email" name="email" placeholder="email..." required/>
-            <input type="text" name="first" placeholder="First Name..." required/>
-            <input type="text" name="last" placeholder="Last Name..." required/>
-            <input type="password" name="password" placeholder="***********" required/>
-            <input type="password" name="confirm_password" placeholder="***********" required/>
-            <SubmitButtonStatus/>
-            <GoogleLoginButton />
-        </form>
+        <div className="register-card">
+            <span className="title">Register</span>
+            <form action={formAction}>
+                <div className="field" id="email-field">
+                    <label htmlFor="email">Email*</label>
+                    <input type="email" id="email" name="email" required autoComplete="off" />
+                </div>
+                <div className="field" id="first-name-field">
+                    <label htmlFor="first-name">First Name*</label>
+                    <input type="text" id="first-name" name="first" required autoComplete="off" />
+                </div>
+                <div className="field" id="last-name-field">
+                    <label htmlFor="last-name">Last Name*</label>
+                    <input type="text" id="last-name" name="last" required autoComplete="off" />
+                </div>
+                <div className="field" id="password-field">
+                    <label htmlFor="password">Password*</label>
+                    <input type="password" id="password" name="password" required autoComplete="off" />
+                </div>
+                <div className="field" id="confirm-password-field">
+                    <label htmlFor="confirm-password">Confirm Password*</label>
+                    <input type="password" id="confirm-password" name="confirm_password" required autoComplete="off" />
+                </div>
+                <SubmitButtonStatus/>
+                <GoogleLoginButton />
+            </form>
+        </div>
     )
 }
 
