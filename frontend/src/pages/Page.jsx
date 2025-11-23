@@ -1,6 +1,15 @@
+import { useEffect, useState } from 'react'
+import PageHome from '../components/page/PageHome'
 import '../css/page.css'
 
 const Page = ()=>{
+    const [currentSection, setCurrentSection] = useState("Home")
+    const handleSectionChange = (event)=>{
+        event.preventDefault()
+        const value = event.target.textContent
+        setCurrentSection(value)
+    }
+    
     return (
         <>
         <main className="company-page" id="1">
@@ -22,34 +31,15 @@ const Page = ()=>{
                     <i className="bi bi-three-dots"></i>
                 </div>
                 <div className="navbar-section">
-                    <span>Home</span>
-                    <span>About</span>
-                    <span>Posts</span>
-                    <span>Jobs</span>
-                    <span>Life</span>
-                    <span>People</span>
+                    <span id='home' onClick={handleSectionChange}>Home</span>
+                    <span id='about' onClick={handleSectionChange}>About</span>
+                    <span id='posts' onClick={handleSectionChange}>Posts</span>
+                    <span id='jobs' onClick={handleSectionChange}>Jobs</span>
+                    <span id='life' onClick={handleSectionChange}>Life</span>
+                    <span id='people' onClick={handleSectionChange}>People</span>
                 </div>
             </div>
-            <div className='company-overview'>
-                <span className='overview-heading'>Overview</span>
-                <span className='overview-description'> 
-                    Every company has a mission. What's ours? To empower every person 
-                    and every organization to achieve more. We believe technology can and 
-                    should be a force for good and that meaningful innovation contributes to a 
-                    brighter world in the future and today. Our culture doesn’t 
-                    just encourage curiosity; it embraces it. Each day we make progress 
-                    together by showing up as our authentic selves. We show up with a 
-                    learn-it-all mentality. We show up cheering on others, knowing 
-                    their success doesn't diminish our own. We show up every day open 
-                    to learning our own biases, changing our behavior, and inviting 
-                    in differences. Because impact matters. 
-                    <br></br>
-                    <br></br>
-                    Microsoft operates in 190 countries and is made up of 
-                    approximately 228,000 passionate employees worldwide.
-                </span>
-                <span className='show-details'>Show details</span>
-                </div>
+            <PageHome />
         </main>
         </>
     )
