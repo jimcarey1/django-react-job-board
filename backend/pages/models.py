@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 from experience.models import LOCATION_TYPE
@@ -7,9 +9,19 @@ from experience.models import Skill
 
 User = get_user_model()
 
+def validate_url(url):
+    validator = URLValidator()
+    try:
+        validator(url)
+        return True
+    except ValidationError:
+        return False
+
+
 class Organization(models.Model):
     title = models.CharField(unique=True)
     specialization = models.CharField()
+    url = models.URLField(max_length=200, validators=[validate_url], null=True)
     overview = models.TextField()
     company_size = models.CharField()
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
