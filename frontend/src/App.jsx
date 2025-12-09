@@ -5,6 +5,7 @@ import LoginForm from "./components/LoginForm"
 import RegisterForm from "./components/RegistrationForm"
 import Profile from "./pages/Profile"
 import Page from "./pages/Page"
+import CreateCompanyPage from "./components/CreateCompanyPage"
 import { useEffect } from "react"
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
       <Route path="/register" element={<RegisterForm />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/company/page" element={<Page />} />
+      <Route path="/company/create" element={<CreateCompanyPage />} />
     </Routes>
     </>
   )
