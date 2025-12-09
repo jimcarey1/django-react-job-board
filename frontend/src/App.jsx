@@ -20,10 +20,21 @@ function App() {
           credentials: 'include',
           body: JSON.stringify({"access":access_token})
         })
-        const data = await response.json()
-        if(data.access){
+        //If the response status is 401(Unauthorized), removing access_token and user details from 
+        //the localStorage as they are no longer valid. 
+        if(response.status == 401){
           localStorage.removeItem('access')
-          localStorage.setItem('access', data.access)
+          localStorage.removeItem('user')
+          return 
+        }  
+        try{
+          const data = await response.json()
+          if(data.access){
+            localStorage.removeItem('access')
+            localStorage.setItem('access', data.access)
+          }
+        }catch(error){
+          console.log(error)
         }
       }catch(error){
           console.log(error)

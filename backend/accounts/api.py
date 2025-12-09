@@ -10,6 +10,7 @@ from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from asgiref.sync import sync_to_async
+from typing import Optional
 
 import jwt
 from jwt.exceptions import ExpiredSignatureError
@@ -28,7 +29,7 @@ class LoginIn(Schema):
     password: str
 
 class TokenOut(Schema):
-    access: str
+    access: Optional[str]
 
 @router.post("/register", response=TokenOut)
 async def register(request: HttpRequest, data: RegisterIn):
@@ -90,18 +91,29 @@ async def google_login(request: HttpRequest, data:GoogleTokenIn):
 @router.post('/access_token', response=TokenOut)
 async def new_access_token(request: HttpRequest, data:TokenOut):
     access_token = data.access
-    try:
-        payload = jwt.decode(access_token, settings.SIMPLE_JWT['SIGNING_KEY'], settings.SIMPLE_JWT['ALGORITHM'], options={'verify_exp':False})
-    except Exception as e:
-        raise HttpError(status_code=400, message='Invalid Access Token')
-    refresh_token:str = request.get_signed_cookie('refresh_token', salt=settings.SALT)
-    if not refresh_token:
-        raise HttpError(status_code=400, message='no refresh token, you are logged out.')
-    try:
-        refresh_token = RefreshToken(refresh_token)
-        return {'access': str(refresh_token.access_token)}
-    except Exception as e:
-        raise HttpError(status_code=400, message=str(e))
+    #If the access token is not None, then we will check for its integrity, else we will raise a 401 Unauthorized error.
+    if data.access:
+        try:
+            payload = jwt.decode(access_token, settings.SIMPLE_JWT['SIGNING_KEY'], settings.SIMPLE_JWT['ALGORITHM'], options={'verify_exp':False})
+        except Exception as e:
+            raise HttpError(status_code=400, message='Invalid Access Token')
+        #generating new access token from the existing refresh token.
+        try:
+            refresh_token:str = request.get_signed_cookie('refresh_token', salt=settings.SALT)
+            if not refresh_token:
+                raise HttpError(status_code=400, message='no refresh token, you are logged out.')
+            try:
+                refresh_token = RefreshToken(refresh_token)
+                return {'access': str(refresh_token.access_token)}
+            except Exception as e:
+                raise HttpError(status_code=400, message=str(e))
+        #If there is no cookie named refresh_token, we will get the KeyError.
+        except KeyError:
+            raise HttpError(status_code=401, message='Unauthorized')
+        except Exception as e:
+            raise HttpError(status_code=401, message='Unauthorized')
+    else:
+        raise HttpError(status_code=401, message='Unauthorized')
 
 
 @router.get('/logout')
