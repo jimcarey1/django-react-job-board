@@ -26,3 +26,7 @@ __pycache__/
 *.njsproj
 *.sln
 *.sw?
+
+city.json
+country.json
+main.py
