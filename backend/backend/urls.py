@@ -5,6 +5,7 @@ from ninja.errors import ValidationError
 
 from accounts.api import router as accounts_api
 from experience.api import router as experience_api
+from pages.api import router as company_api
 
 api = NinjaAPI()
 
@@ -15,6 +16,7 @@ def custom_validation_errors(request, exc):
 
 api.add_router('/auth/', accounts_api)
 api.add_router('/experience', experience_api)
+api.add_router('/company', company_api)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
