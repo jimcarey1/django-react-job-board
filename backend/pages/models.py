@@ -2,12 +2,21 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-# Create your models here.
 
 from experience.models import LOCATION_TYPE
 from experience.models import Skill
+from .utils import get_specializations_list
 
 User = get_user_model()
+
+COMPANY_SIZE = (
+    ('Less than 50', '<50'),
+    ('50 - 100', '50-100'),
+    ('100-500', '100-500'),
+    ('500-1K', '500-1K'),
+    ('1K+', '1K+'),
+    ('10K+', '10K+')
+)
 
 def validate_url(url):
     validator = URLValidator()
@@ -17,13 +26,15 @@ def validate_url(url):
     except ValidationError:
         return False
 
+class Specialization(models.Model):
+    name = models.CharField(max_length=150, unique=True)
 
 class Organization(models.Model):
     title = models.CharField(unique=True)
     specialization = models.CharField()
     url = models.URLField(max_length=200, validators=[validate_url], null=True)
     overview = models.TextField()
-    company_size = models.CharField()
+    company_size = models.CharField(choices=COMPANY_SIZE)
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     followers = models.ManyToManyField(User, related_name='organizations')
 
