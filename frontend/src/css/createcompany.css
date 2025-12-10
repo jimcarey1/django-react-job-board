@@ -65,7 +65,7 @@ body{
    justify-content: space-between;
 }
 
-.tab1-next, .tab2-next, .tab2-previous, .tab3-previous, .create-company-page-button{
+.tab1-next, .tab2-next, .tab2-previous, .tab3-previous, .create-company-page-button, .create-company-cancel-button{
     background-color: blue;
     padding: 8px 25px;
     color: white;

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import AsyncSelect from 'react-select/async'
+import Select from 'react-select'
 import '../css/createcompany.css'
 
 //We have to build a mulit-tab form, where each tab represents a section about the company such as what they do etc.
 const CreateCompanyPage = ()=>{
+    const accessToken = localStorage.getItem('access') || null;
     //We want to update the dom on state changes, so we are using useRef.
     const tab1Ref = useRef(null);
     const tab2Ref = useRef(null);
@@ -12,16 +14,27 @@ const CreateCompanyPage = ()=>{
     //Based on the tab value, we will display that particular tab in the form.
     const [currentTab, setCurrentTab] = useState(1)
 
+    const [specializations, setSpecializations] = useState(JSON.parse(localStorage.getItem('specializations')) || [])
+    const [companySize, setCompanySize] = useState(JSON.parse(localStorage.getItem('companySize')) || [])
+    const [headquarters, setHeadquarters] = useState([])
+
     //we are storing and managing the form values using useState hook.
-    const [companyName, setCompanyName] = useState('');
-    const [specialization, setSpecialization] = useState('');
-    const [companyUrl, setCompanyUrl] = useState('');
-    const [headquarters, setHeadquarters] = useState([]);
-    const [companySize, setCompanySize] = useState('');
+    const [companyName, setCompanyName] = useState('')
+    const [companyUrl, setCompanyUrl] = useState('')
+    const [selectedHeadquarters, setSelectedHeadquarters] = useState('')
+    const [selectedSpecialization, setSelectedSpecialization] = useState('')
+    const [selectedCompanySize, setSelectedCompanySize] = useState('')
     const overviewRef = useRef(null);
 
     const [loading, setLoading] = useState(true);
 
+    const changeArrayToSelectCompatibleOptions = (inputArray)=>{
+        return inputArray.map((value)=>({'label':value, 'value':value}))
+    }
+
+    /* Based on the value of the currentTab, we will display that particular tab in the form. 
+       Everytime, the currentTab state changes, this useEffect runs.
+    */
     useEffect(()=>{
         {/* We will run this useEffect everytime we update the state for the currentTab. */}
         const Navigate = ()=>{
@@ -52,6 +65,11 @@ const CreateCompanyPage = ()=>{
         Navigate()
     }, [currentTab])
 
+    /* Right now, I am storing my cities data in json file in public folder.
+        The file is almost 12MB and not recommended to store this in frontend
+        in the production setting.
+        Store the cities data in the backend and fetch cities based on the user input. 
+    */
     useEffect(()=>{
         const fetchCityCountry = async ()=>{
             try{
@@ -74,6 +92,70 @@ const CreateCompanyPage = ()=>{
         fetchCityCountry()
     }, [])
 
+    /* This useEffect fetches specializations and companysizes from the backend, 
+        if they are not present in the localStorage. 
+    */
+    useEffect(()=>{
+        const fetchSpecializations = async ()=>{
+            try{
+                const response = await fetch('http://localhost:8000/api/company/specializations', {
+                    headers:{
+                        'Content-Type':'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    credentials: 'include'
+                })
+                if(response.ok){
+                    try{
+                        let data = await response.json()
+                        data = changeArrayToSelectCompatibleOptions(data.specializations)
+                        setSpecializations(data)
+                        localStorage.setItem('specializations', JSON.stringify(data))
+                    }catch(error){
+                        console.log(error)
+                    }
+                }
+            }catch(error){
+                console.log(error)
+            }
+        }
+        const fetchCompanySize = async ()=>{
+            try{
+                const response = await fetch('http://localhost:8000/api/company/company-size', {
+                    headers:{
+                        'Content-Type':'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    credentials: 'include'
+                })
+                if(response.ok){
+                    try{
+                        let data = await response.json()
+                        data = changeArrayToSelectCompatibleOptions(data.companySize)
+                        setCompanySize(data)
+                        localStorage.setItem('companySize', JSON.stringify(data))
+                    }catch(error){
+                        console.log(error)
+                    }
+                }
+            }catch(error){
+                console.log(error)
+            }
+        }
+
+        if(specializations.length == 0){
+            fetchSpecializations()
+        }
+        if(companySize.length == 0){
+            fetchCompanySize()
+        }
+    }, [])
+
+    /* Based on the input value, we filters the options by that input value.
+       This piece of code is from the react-select documentation.
+       You can find the code here in promises section. 
+       https://react-select.com/async
+    */
     const loadOptions = (inputValue) => {
         if (!inputValue) {
         return Promise.resolve([])
@@ -86,6 +168,16 @@ const CreateCompanyPage = ()=>{
 
         return Promise.resolve(filtered)
     };
+
+    //This is a function, when user fills the form and click on submit button.
+    const handleSubmit = ()=>{
+
+    }
+
+    //This is a function, when user fills the form and click on cancel button.
+    const handleCancel = ()=>{
+
+    }
 
 
     return(
@@ -111,7 +203,13 @@ const CreateCompanyPage = ()=>{
                     </div>
                     <div className="field">
                         <label>Specialization<span className='required'>*</span></label>
-                        <select></select>
+                        <Select 
+                            cacheOptions
+                            options = {specializations}
+                            isSearchable
+                            value={selectedSpecialization}
+                            onChange={(selected)=>setSelectedSpecialization(selected)}
+                        />
                     </div>
                     <div className="field">
                         <label>Company Website<span className='required'>*</span></label>
@@ -140,11 +238,19 @@ const CreateCompanyPage = ()=>{
                         <AsyncSelect
                             cacheOptions
                             loadOptions={loadOptions}
+                            value={selectedHeadquarters}
+                            onChange={(selected)=>setSelectedHeadquarters(selected)}
                         />
                     </div>
                     <div className="field">
                         <label>Company Size<span className="required">*</span></label>
-                        <select></select>
+                        <Select 
+                            cacheOptions
+                            options={companySize}
+                            isSearchable
+                            value={selectedCompanySize}
+                            onChange={(selected)=>setSelectedCompanySize(selected)}
+                        />
                     </div>
                     <div className='navigation-button'>
                         <button className='tab2-previous' onClick={()=>setCurrentTab((prev)=>prev-1)}>previous</button>
@@ -164,6 +270,7 @@ const CreateCompanyPage = ()=>{
                     <div className='navigation-button'>
                         <button className='tab3-previous' onClick={()=>setCurrentTab((prev)=>prev-1)}>previous</button>
                         <button className='create-company-page-button'>Submit</button>
+                        <button className='create-company-cancel-button'>Cancel</button>
                     </div>
                 </div>
             </form>
