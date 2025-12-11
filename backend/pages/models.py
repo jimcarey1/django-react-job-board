@@ -34,7 +34,8 @@ class Organization(models.Model):
     specialization = models.CharField()
     url = models.URLField(max_length=200, validators=[validate_url], null=True)
     overview = models.TextField()
-    company_size = models.CharField(choices=COMPANY_SIZE)
+    company_size = models.CharField()
+    headquarters = models.CharField(default='State, Country')
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     followers = models.ManyToManyField(User, related_name='organizations')
 
