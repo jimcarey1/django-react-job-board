@@ -2,14 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import AsyncSelect from 'react-select/async'
 import Select from 'react-select'
 import '../css/createcompany.css'
+import {useNavigate} from 'react-router-dom'
 
 //We have to build a mulit-tab form, where each tab represents a section about the company such as what they do etc.
 const CreateCompanyPage = ()=>{
     const accessToken = localStorage.getItem('access') || null;
+
+    const navigate = useNavigate()
+
     //We want to update the dom on state changes, so we are using useRef.
-    const tab1Ref = useRef(null);
-    const tab2Ref = useRef(null);
-    const tab3Ref = useRef(null);
+    const tab1Ref = useRef(null)
+    const tab2Ref = useRef(null)
+    const tab3Ref = useRef(null)
 
     //Based on the tab value, we will display that particular tab in the form.
     const [currentTab, setCurrentTab] = useState(1)
@@ -170,8 +174,41 @@ const CreateCompanyPage = ()=>{
     };
 
     //This is a function, when user fills the form and click on submit button.
-    const handleSubmit = ()=>{
-
+    const handleSubmit = async (event)=>{
+        event.preventDefault()
+        {/*checking if all the form variables are populated and has some value.*/}
+        if(companyName && selectedSpecialization && companyUrl && selectedHeadquarters && selectedCompanySize && overviewRef.current){
+            const companyOverview = overviewRef.current.value
+            try{
+                const response = await fetch('http://localhost:8000/api/company/create-page', {
+                    method: 'POST',
+                    headers:{
+                        'Content-Type':'application/json',
+                        'Authorization':`Bearer ${accessToken}`,
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        'name':companyName,
+                        'specialization':selectedSpecialization.value,
+                        'url':companyUrl,
+                        'headquarters': selectedHeadquarters.value,
+                        'company_size': selectedCompanySize.value,
+                        'overview': companyOverview
+                    })
+                })
+                if(response.ok){
+                    try{
+                        const data = await response.json()
+                        data = data.company
+                        navigate(`/${data.title}/page`)
+                    }catch(error){
+                        console.log(error)
+                    }
+                }
+            }catch(error){
+                console.log(error)
+            }
+        }
     }
 
     //This is a function, when user fills the form and click on cancel button.
@@ -269,7 +306,7 @@ const CreateCompanyPage = ()=>{
                     </div>
                     <div className='navigation-button'>
                         <button className='tab3-previous' onClick={()=>setCurrentTab((prev)=>prev-1)}>previous</button>
-                        <button className='create-company-page-button'>Submit</button>
+                        <button className='create-company-page-button' onClick={(event)=>handleSubmit(event)}>Submit</button>
                         <button className='create-company-cancel-button'>Cancel</button>
                     </div>
                 </div>

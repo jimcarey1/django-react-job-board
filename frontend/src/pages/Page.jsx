@@ -5,9 +5,7 @@ const Page = ()=>{
     
     return (
         <>
-        <main className='company-page'>
-            
-        </main>
+        <h1>Company Page</h1>
         </>
     )
 }
