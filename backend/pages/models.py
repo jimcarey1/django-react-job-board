@@ -36,7 +36,7 @@ class Organization(models.Model):
     overview = models.TextField()
     company_size = models.CharField()
     headquarters = models.CharField(default='State, Country')
-    user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     followers = models.ManyToManyField(User, related_name='organizations')
 
 class Job(models.Model):
