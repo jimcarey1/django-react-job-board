@@ -52,7 +52,7 @@ function App() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/company/page" element={<Page />} />
+      <Route path="/:name/page" element={<Page />} />
       <Route path="/company/create" element={<CreateCompanyPage />} />
     </Routes>
     </>
