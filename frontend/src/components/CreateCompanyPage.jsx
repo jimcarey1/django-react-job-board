@@ -198,7 +198,7 @@ const CreateCompanyPage = ()=>{
                 })
                 if(response.ok){
                     try{
-                        const data = await response.json()
+                        let data = await response.json()
                         data = data.company
                         navigate(`/${data.title}/page`)
                     }catch(error){
