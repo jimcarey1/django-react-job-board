@@ -18,6 +18,12 @@ from jwt.exceptions import ExpiredSignatureError
 router = Router()
 User = get_user_model()
 
+class UserSchema(Schema):
+    id:int
+    email:str
+    first_name:str
+    last_name:str
+
 class RegisterIn(Schema):
     email: str
     password: str
@@ -28,10 +34,14 @@ class LoginIn(Schema):
     email: str
     password: str
 
-class TokenOut(Schema):
+class TokenIn(Schema):
     access: Optional[str]
 
-@router.post("/register", response=TokenOut)
+class TokenOut(Schema):
+    access: Optional[str]
+    user: Optional[UserSchema]
+
+@router.post("/register", response=TokenIn)
 async def register(request: HttpRequest, data: RegisterIn):
     if await User.objects.filter(email = data.email).aexists():
         raise HttpError(status_code=400, message='A User with this email already exists.')
@@ -88,8 +98,8 @@ async def google_login(request: HttpRequest, data:GoogleTokenIn):
 
 
 
-@router.post('/access_token', response=TokenOut)
-async def new_access_token(request: HttpRequest, data:TokenOut):
+@router.post('/access_token', response=TokenIn)
+async def new_access_token(request: HttpRequest, data:TokenIn):
     access_token = data.access
     #If the access token is not None, then we will check for its integrity, else we will raise a 401 Unauthorized error.
     if data.access:
