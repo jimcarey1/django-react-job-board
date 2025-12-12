@@ -43,6 +43,7 @@ class Job(models.Model):
     title = models.CharField()
     description = models.TextField()
     location_type = models.CharField(choices=LOCATION_TYPE)
+    skills = models.ManyToManyField(Skill, related_name='jobs')
     organization = models.ForeignKey(Organization, related_name='jobs', on_delete=models.CASCADE)
     applicants = models.ManyToManyField(User, related_name='jobs')
 
