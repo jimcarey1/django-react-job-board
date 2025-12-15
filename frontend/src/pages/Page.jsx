@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import {useParams} from 'react-router-dom'
+import {Link, useParams} from 'react-router-dom'
 import '../css/page.css'
 
 const Page = ()=>{
     const accessToken = localStorage.getItem('access') || null;
     const {name} = useParams()
-    const [company, setCompany] = useState('');
+    const [company, setCompany] = useState(null);
     useEffect(()=>{
         const fetchCompany = async ()=>{
             try{
@@ -20,7 +20,7 @@ const Page = ()=>{
                 if(response.ok){
                     try{
                         const data = await response.json()
-                        setCompany(data.page)
+                        setCompany(data)
                     }catch(error){
                         console.log(error)
                     }
@@ -33,13 +33,18 @@ const Page = ()=>{
     }, [])
     return (
         <>
+        {company &&
         <div className='company-page' id={company.id}>
             <div>
                 <span>{company.title}</span>
                 <span>{company.url}</span>
                 <span>Specialized in: {company.specialization}</span> 
             </div>
+            <div className='add-job'>
+                <Link to={`/${company.title}/job/create`}>Add Job </Link>
+            </div>
         </div>
+        }
         </>
     )
 }
