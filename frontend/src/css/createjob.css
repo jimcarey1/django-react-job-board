@@ -1,0 +1,38 @@
+.post-job{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: left;
+    width: 700px;
+    padding: 30px;
+    border: 1px solid grey;
+    border-radius: 15px;
+    background-color: antiquewhite;
+}
+
+.post-job span{
+    align-self: center;
+    font-weight: bolder;
+    font-size: large;
+    color: blue;
+}
+
+.post-job .action-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+}
+
+.post-job .action-buttons button{
+    padding: 5px 10px;
+    border: none;
+    border-radius: 15px;
+    background-color: blue;
+    color: white;
+    font-weight: bolder;
+    cursor: pointer;
+}
+
+.field textarea{
+    border-radius: 15px;
+}
