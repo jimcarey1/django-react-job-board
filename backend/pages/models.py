@@ -43,6 +43,7 @@ class Job(models.Model):
     title = models.CharField()
     description = models.TextField()
     location_type = models.CharField(choices=LOCATION_TYPE)
+    location = models.CharField(null=True)
     skills = models.ManyToManyField(Skill, related_name='jobs')
     experience = models.SmallIntegerField(default=1)
     ctc = models.PositiveIntegerField(null=True, blank=True)
