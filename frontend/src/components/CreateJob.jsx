@@ -1,13 +1,21 @@
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
+import AsyncSelect from 'react-select/async'
+import { useParams } from "react-router-dom"
 import { justSkillNames } from "./AddExperience"
 import '../css/createjob.css'
 
 const CreateJob = ()=>{
+    const {company_name} = useParams()
+    const accessToken = localStorage.getItem('access')
+
     const [jobTitle, setJobTitle] = useState('')
-    const [selectedlocationType, setSelectedLocationType] = useState('')
+    const [selectedlocationType, setSelectedLocationType] = useState({})
     const [selectedSkills, setSelectedSkills] = useState([])
+    const [selectedLocation, setSelectedLocation] = useState('')
+    const [experience, setExperience] = useState(0)
+    const [ctc, setCtc] = useState(0)
     
     const jobDescriptionRef = useRef(null)
 
@@ -17,6 +25,70 @@ const CreateJob = ()=>{
     const skillOptions = justSkillNames(skills)
     const locationTypeOptions = locationTypes.map((location)=>({'value':location, 'label':location}))
 
+    const [locations, setLocations] = useState([])
+    const [loading, setLoading] = useState(false);
+    console.log(jobTitle, selectedLocation, selectedSkills, ctc, experience, selectedlocationType, company_name)
+
+    useEffect(()=>{
+        const fetchCityCountry = async ()=>{
+            try{
+                const response = await fetch('/data/modified_cities.json')
+                if(response.ok){
+                    try{
+                        const data = await response.json()
+                        setLocations(data)
+                        setLoading(false)
+                    }catch(error){
+                        console.log(error)
+                        setLoading(false)
+                    }
+                }
+            }catch(error){
+                console.log(error)
+                setLoading(false)
+            }
+        }
+        fetchCityCountry()
+    }, [])
+
+    const loadOptions = (inputValue) => {
+        if (!inputValue) {
+        return Promise.resolve([])
+        }
+
+        const filtered = locations.filter(city =>
+            city.label.toLowerCase().includes(inputValue.toLowerCase())
+        )
+        .slice(0, 100)
+
+        return Promise.resolve(filtered)
+    };
+
+    const onSubmit = async ()=>{
+        const description = jobDescriptionRef.current.value
+        const response = await fetch('http://localhost:8000/api/company/add-job', {
+            method: 'POST',
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                title: jobTitle,
+                description: description,
+                location: selectedLocation.value,
+                skills: selectedSkills.map((skill)=>skill.value),
+                ctc: ctc,
+                experience: experience,
+                location_type: selectedlocationType.value,
+                organization: company_name
+            })
+        })
+        if(response.ok){
+            const data = await response.json()
+            console.log(data)
+        }
+    }
 
     return (
         <>
@@ -41,6 +113,16 @@ const CreateJob = ()=>{
                     />
                 </div>
                 <div className="field">
+                    <label htmlFor="locations">Location<span className="required">*</span></label>
+                    <AsyncSelect
+                        id="locations"
+                        isClearable
+                        loadOptions={loadOptions}
+                        value={selectedLocation}
+                        onChange={(selected)=>setSelectedLocation(selected)}
+                    />
+                </div>
+                <div className="field">
                     <label htmlFor="skills">Skills Required<span className="required">*</span></label>
                     <CreatableSelect 
                         id="skills"
@@ -53,14 +135,14 @@ const CreateJob = ()=>{
                 </div>
                 <div className="field">
                     <label htmlFor="experience">Experience<span className="required">*</span></label>
-                    <input type="text" name="experience" id="experience" required />
+                    <input type="number" id="experience" required value={experience} onChange={(e)=>setExperience(e.target.value)} />
                 </div>
                 <div className="field">
                     <label htmlFor="ctc">CTC<span className="required">*</span></label>
-                    <input type="text" id="ctc" name="ctc" required />
+                    <input type="text" id="ctc" value={ctc} onChange={(e)=>setCtc(e.target.value)}/>
                 </div>
                 <div className="action-buttons">
-                    <button className="submit-button">Submit</button>
+                    <button className="submit-button" onClick={onSubmit}>Submit</button>
                     <button className="cancel-button">Cancel</button>
                 </div>
             </form>

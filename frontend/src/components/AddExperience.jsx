@@ -4,7 +4,7 @@ import CreatableSelect from 'react-select/creatable'
 import '../css/addexperience.css'
 import { fetchEmploymentType, fetchLocationType, fetchLocation, fetchSkills } from '../services/experience';
 
-const justSkillNames = (skills)=>{
+export const justSkillNames = (skills)=>{
     const skillNames = skills.map((skill)=>({'value': skill.name, 'label': skill.name}))
     return skillNames
 }
