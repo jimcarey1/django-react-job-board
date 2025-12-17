@@ -45,6 +45,8 @@ LOCATION = (
     ('gandhinagar', 'Gandhinagar'),
     ('surat', 'Surat'),
 )
+class Location(models.Model):
+    name = models.CharField(unique=True)
 
 LOCATION_TYPE = (
     ('onsite', 'Onsite'),
