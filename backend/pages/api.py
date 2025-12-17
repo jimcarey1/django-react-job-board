@@ -12,9 +12,11 @@ import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from asgiref.sync import sync_to_async
 
-from .models import Specialization, COMPANY_SIZE, Organization
+from .models import Specialization, COMPANY_SIZE, Organization, Job
+from experience.models import Skill
 from .utils import get_specializations_list
 from accounts.api import UserSchema
+from experience.utils import async_iter
 
 router = Router()
 User = get_user_model()
@@ -42,6 +44,26 @@ class OrganizationSchema(Schema):
     company_size: str
     overview: str
     user: UserSchema
+
+class JobSchema(Schema):
+    title:str
+    description: str
+    location_type: str
+    location: str
+    experience: int
+    skills: List[str]
+    ctc: int
+    organization: str
+
+class AddJobSchemaResponse(Schema):
+    id:int
+    title: str
+    description: str
+    location_type: str
+    location: str
+    experience: int
+    ctc: int
+    organization: OrganizationSchema
 
 
 @router.post('/create-page', response=OrganizationSchema)
@@ -94,3 +116,36 @@ async def get_company_sizes(request:HttpRequest):
     response = Response({'companySize':company_sizes})
     response.status_code = 200
     return response
+
+@router.post('/add-job', response=AddJobSchemaResponse)
+async def add_job(request:HttpRequest, data:JobSchema):
+    authorization_header:str = request.headers.get('Authorization')
+    if authorization_header and authorization_header.startswith('Bearer'):
+        access_token = authorization_header.split()[1]
+    try:
+        payload = jwt.decode(access_token, settings.SIMPLE_JWT['SIGNING_KEY'], settings.SIMPLE_JWT['ALGORITHM'])
+    except (InvalidTokenError, ExpiredSignatureError):
+        raise HttpError(status_code=401, message='Unauthenticated')
+    except Exception as exc:
+        raise HttpError(status_code=400, message=str(exc))
+    
+    try:
+        organization = await Organization.objects.aget(title = data.organization)
+        job = await Job.objects.acreate(
+            title = data.title,
+            description = data.description,
+            location = data.location,
+            location_type = data.location_type,
+            experience = data.experience,
+            ctc = data.ctc,
+            organization = organization,
+        )
+        async for skill in async_iter(data.skills):
+            skill, _ = await Skill.objects.aget_or_create(name=skill)
+            await job.skills.aadd(skill)
+        job = Job.objects.select_related('user').aget(title=data.title)
+        return job
+    except Exception as exc:
+        raise HttpError(status_code=500, message=str(exc))
+
+        
