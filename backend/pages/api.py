@@ -148,4 +148,10 @@ async def add_job(request:HttpRequest, data:JobSchema):
     except Exception as exc:
         raise HttpError(status_code=500, message=str(exc))
 
-        
+@router.get('/job/{name}/{id}', response=AddJobSchemaResponse)
+async def get_job(request:HttpRequest, name:str, id:int,):
+    try:
+        job = await Job.objects.select_related('organization', 'organization__user').aget(id=id)
+        return job
+    except ObjectDoesNotExist:
+        raise HttpError(status_code=404, message='A Job with that name has not found.')
