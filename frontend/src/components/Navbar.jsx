@@ -5,7 +5,8 @@ import { Link } from "react-router-dom"
 
 const Navbar = ()=>{
     const {logout} = useContext(AuthContext)
-    const accessToken = localStorage.getItem('access')
+    const accessToken = localStorage.getItem('access') || null;
+    console.log(accessToken)
 
     if(accessToken){
         return(

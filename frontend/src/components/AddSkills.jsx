@@ -48,11 +48,9 @@ const AddSkills = () =>{
                 credentials: 'include'
             })
             if(response.ok){
-                const data = await response.json()
-                if(data.userSkills){
-                    setUserSkills(data.userSkills)
-                    console.log(userSkills)
-                }
+                const userSkills = await response.json()
+                setUserSkills(userSkills)
+                console.log(userSkills)
             }
             setLoading(false)   
         }

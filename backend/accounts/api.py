@@ -47,7 +47,7 @@ async def register(request: HttpRequest, data: RegisterSchema):
     await user.asave()
     refresh = await sync_to_async(RefreshToken.for_user)(user)
     access = str(refresh.access_token)
-    response = Response({"access": access, "user":model_to_dict(user, fields=['id', 'email', 'first_name', 'last_name'])})
+    response = Response({"access": access, "user":UserSchema.from_orm(user)})
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
     return response 
 
@@ -58,9 +58,9 @@ async def login(request: HttpRequest, data: LoginSchema):
         raise HttpError(status_code=400, message='Invalid credentials.')
     refresh = await sync_to_async(RefreshToken.for_user)(user)
     access = str(refresh.access_token)
-    response = Response()
+    response = Response({"access":access, "user":UserSchema.from_orm(user)})
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
-    return {"access": access, "user":user}
+    return response
 
 @router.post("/google/", response=TokenSchema)
 async def google_login(request: HttpRequest, data:TokenSchema):
@@ -81,10 +81,10 @@ async def google_login(request: HttpRequest, data:TokenSchema):
         # Optionally set other fields if created
         refresh = await sync_to_async(RefreshToken.for_user)(user)
         access_token = str(refresh.access_token)
-        response = Response()
+        response = Response({"access": access_token, "user": UserSchema.from_orm(user)})
         response.status_code = 200
         response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
-        return {"access": access_token, "user": user}
+        return response
     except Exception as e:
         # token invalid or verification failed
         raise HttpError(status_code=500, message=str(e))

@@ -12,8 +12,9 @@ import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from asgiref.sync import sync_to_async
 
-from .models import Specialization, COMPANY_SIZE, Organization, Job
+from .models import Specialization, COMPANY_SIZE, Organization, Job, Skill
 from experience.models import Skill
+from experience.api import SkillSchema
 from .utils import get_specializations_list
 from accounts.api import UserSchema
 from experience.utils import async_iter
@@ -21,11 +22,9 @@ from experience.utils import async_iter
 router = Router()
 User = get_user_model()
 
-class SpecializationOut(Schema):
-    specializations: List[str]
-
-class CompanySizeOut(Schema):
-    companySize: List[str]
+class SpecializationSchema(Schema):
+    id: int | None = None
+    name: str
 
 class CreatePageIn(Schema):
     name: str
@@ -43,27 +42,19 @@ class OrganizationSchema(Schema):
     headquarters: str
     company_size: str
     overview: str
-    user: UserSchema
+    user: UserSchema | None = None
 
 class JobSchema(Schema):
+    id: int | None
     title:str
     description: str
     location_type: str
     location: str
     experience: int
-    skills: List[str]
+    skills: List[SkillSchema]
     ctc: int
-    organization: str
+    organization: OrganizationSchema | None = None
 
-class AddJobSchemaResponse(Schema):
-    id:int
-    title: str
-    description: str
-    location_type: str
-    location: str
-    experience: int
-    ctc: int
-    organization: OrganizationSchema
 
 
 @router.post('/create-page', response=OrganizationSchema)
@@ -105,20 +96,18 @@ async def get_page(request:HttpRequest, name:str):
     except ObjectDoesNotExist:
         raise HttpError(status_code=404, message='Not found')
 
-@router.get('/specializations', response=SpecializationOut)
+@router.get('/specializations', response=List[SpecializationSchema])
 async def get_specializations(request:HttpRequest):
-    specializations = await sync_to_async(Specialization.objects.all)
+    specializations = await sync_to_async(Specialization.objects.all)()
     return specializations
 
 @router.get('/company-size')
 async def get_company_sizes(request:HttpRequest):
     company_sizes = [size[0] for size in COMPANY_SIZE]
-    response = Response({'companySize':company_sizes})
-    response.status_code = 200
-    return response
+    return company_sizes
 
-@router.post('/add-job', response=AddJobSchemaResponse)
-async def add_job(request:HttpRequest, data:JobSchema):
+@router.post('/{organization}/add-job', response=JobSchema)
+async def add_job(request:HttpRequest, data:JobSchema, organization:str):
     authorization_header:str = request.headers.get('Authorization')
     if authorization_header and authorization_header.startswith('Bearer'):
         access_token = authorization_header.split()[1]
@@ -130,7 +119,7 @@ async def add_job(request:HttpRequest, data:JobSchema):
         raise HttpError(status_code=400, message=str(exc))
     
     try:
-        organization = await Organization.objects.aget(title = data.organization)
+        organization = await Organization.objects.aget(title = organization)
         job = await Job.objects.acreate(
             title = data.title,
             description = data.description,
@@ -148,10 +137,19 @@ async def add_job(request:HttpRequest, data:JobSchema):
     except Exception as exc:
         raise HttpError(status_code=500, message=str(exc))
 
-@router.get('/job/{name}/{id}', response=AddJobSchemaResponse)
+@router.get('/job/{name}/{id}', response=JobSchema)
 async def get_job(request:HttpRequest, name:str, id:int,):
     try:
-        job = await Job.objects.select_related('organization', 'organization__user').aget(id=id)
+        job = await Job.objects.select_related('organization', 'organization__user').prefetch_related('skills').aget(id=id)
+        #print(JobSchema.from_orm(job))
         return job
     except ObjectDoesNotExist:
         raise HttpError(status_code=404, message='A Job with that name has not found.')
+
+@router.get('/{organization}/jobs', response=List[JobSchema])
+def get_jobs_posted_by_org(request:HttpRequest, organization:str):
+    try:
+        jobs =  Job.objects.filter(organization__title = organization).prefetch_related('skills')
+        return jobs
+    except ObjectDoesNotExist:
+        raise HttpError(status_code=401, message='Not found')

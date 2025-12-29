@@ -2,8 +2,13 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 
 const Job = ()=>{
+    //checking for accessToken in the localStorage.
+    const accessToken = localStorage.getItem('access') || null;
+
     const {name, id} = useParams() 
-    const [job, setJob] = useState({})
+    const [job, setJob] = useState(null)
+
+    //We are fetching the job when the component renders.
     useEffect(()=>{
         const fetchJob = async ()=>{
             try{
@@ -11,7 +16,7 @@ const Job = ()=>{
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer `
+                        'Authorization': `Bearer ${accessToken}`,
                     },
                     credentials: 'include'
                 })
@@ -30,12 +35,17 @@ const Job = ()=>{
         }
         fetchJob()
     }, [])
+
+    //Rendering the job details on the page.
     return (
         <div className="job-page">
             <div className="job-details">
-                <span>{job.title}</span>
-                <span>Posted by {job.organization.title}</span>
-                {job.description}
+                {job && 
+                <>
+                    <span>{job.title}</span>
+                    <span>Posted by {job.organization.title}</span>
+                    {job.description}
+                </>}
             </div>
         </div>
     )

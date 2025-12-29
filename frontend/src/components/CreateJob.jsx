@@ -66,7 +66,9 @@ const CreateJob = ()=>{
 
     const onSubmit = async ()=>{
         const description = jobDescriptionRef.current.value
-        const response = await fetch('http://localhost:8000/api/company/add-job', {
+        /*changed the fetch API endpoint, removed organization from request body and send it
+        in the URL via query parameter.*/
+        const response = await fetch(`http://localhost:8000/api/company/${company_name}/add-job`, {
             method: 'POST',
             headers:{
                 'Content-Type': 'application/json',
@@ -81,7 +83,6 @@ const CreateJob = ()=>{
                 ctc: ctc,
                 experience: experience,
                 location_type: selectedlocationType.value,
-                organization: company_name
             })
         })
         if(response.ok){

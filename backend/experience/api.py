@@ -19,7 +19,8 @@ from .utils import fetch_skills_from_the_db, async_iter, convert_model_to_dict, 
 router = Router()
 User = get_user_model()
 
-class AddExperience(Schema):
+class ExperienceSchema(Schema):
+    id: int | None = None
     title : str
     employment_type : str
     company : str
@@ -31,7 +32,8 @@ class AddExperience(Schema):
     end_date : Optional[str]
     skills : List[str]
 
-class AddSkill(Schema):
+class SkillSchema(Schema):
+    id: int | None = None
     name : str
 
 
@@ -53,7 +55,7 @@ def get_location(request: HttpRequest):
 
 
 @router.post('/add-experience')
-async def add_experience(request: HttpRequest, data: AddExperience):
+async def add_experience(request: HttpRequest, data: ExperienceSchema):
     start_date = data.start_date
     start_date_object = datetime.strptime(start_date, "%Y-%m-%d").date()
     
@@ -81,18 +83,16 @@ async def add_experience(request: HttpRequest, data: AddExperience):
     async for skill in async_iter(data.skills):
         skill_obj, created = await Skill.objects.aget_or_create(name=skill, skill_type='Technical Skills')
         await experience.skills.aadd(skill_obj.id)
-    return {"status" : "successfull"}
+    return experience
 
-@router.get('/skills')
+@router.get('/skills', response=List[SkillSchema])
 async def get_skills(request: HttpRequest):
     skills = await sync_to_async(fetch_skills_from_the_db)()
-    response = JsonResponse({"skills":skills})
-    response.status_code = 200
-    return response
+    return skills
 
 
 @router.post('/add-skill')
-async def add_skill(request: HttpRequest, data:AddSkill):
+async def add_skill(request: HttpRequest, data:SkillSchema):
     access_token = request.headers.get('Authorization')
     if access_token:
         access_token = access_token.split(' ')[1]
@@ -111,12 +111,9 @@ async def add_skill(request: HttpRequest, data:AddSkill):
     skill_name = data.name
     skill, created = await Skill.objects.aget_or_create(name=skill_name, skill_type='Technical Skills')
     await skill.users.aadd(user)
-    skill_dict = await sync_to_async(convert_model_to_dict)(skill)
-    response = Response({"skill" : skill_dict})
-    response.status_code = 200
-    return response
+    return skill
 
-@router.get('/check-experience')
+@router.get('/check-experience', response=List[ExperienceSchema])
 async def check_user_experience(request: HttpRequest):
     access_token = request.headers.get('Authorization')
     if access_token:
@@ -139,9 +136,9 @@ async def check_user_experience(request: HttpRequest):
         start_date:datetime.date = experience.get('start_date')
         start_date = start_date.strftime("%b %Y")
         experience.update({'start_date':start_date})
-    return ({"userExperiences":user_experiences})
+    return user_experiences
 
-@router.get('/check-skills')
+@router.get('/check-skills', response=List[SkillSchema])
 async def get_user_skills(request:HttpRequest):
     access_token = request.headers.get('Authorization')
     if access_token:
@@ -160,5 +157,5 @@ async def get_user_skills(request:HttpRequest):
     user_id = payload.get('user_id')
     user = await User.objects.aget(id=user_id)
     user_skills = await sync_to_async(fetch_user_skills)(user)
-    return {"userSkills" : user_skills}
+    return user_skills
     

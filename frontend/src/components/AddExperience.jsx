@@ -123,8 +123,9 @@ const AddExperience = () =>{
                 credentials: 'include'
             })
             if(response.ok){
-                const data = await response.json()
-                setUserExperiences(data.userExperiences)
+                const userExperiences = await response.json()
+                console.log(userExperiences)
+                setUserExperiences(userExperiences)
             }
             setLoading(false)
         }
