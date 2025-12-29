@@ -24,25 +24,22 @@ class UserSchema(Schema):
     first_name:str
     last_name:str
 
-class RegisterIn(Schema):
+class RegisterSchema(Schema):
     email: str
     password: str
     first_name: str
     last_name: str
 
-class LoginIn(Schema):
+class LoginSchema(Schema):
     email: str
     password: str
 
-class TokenIn(Schema):
+class TokenSchema(Schema):
     access: Optional[str]
+    user: UserSchema | None = None
 
-class TokenOut(Schema):
-    access: Optional[str]
-    user: Optional[UserSchema]
-
-@router.post("/register", response=TokenIn)
-async def register(request: HttpRequest, data: RegisterIn):
+@router.post("/register", response=TokenSchema)
+async def register(request: HttpRequest, data: RegisterSchema):
     if await User.objects.filter(email = data.email).aexists():
         raise HttpError(status_code=400, message='A User with this email already exists.')
     user = User(email=data.email, first_name=data.first_name, last_name=data.last_name)
@@ -54,27 +51,23 @@ async def register(request: HttpRequest, data: RegisterIn):
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
     return response 
 
-@router.post("/login")
-async def login(request: HttpRequest, data: LoginIn):
+@router.post("/login", response=TokenSchema)
+async def login(request: HttpRequest, data: LoginSchema):
     user = await aauthenticate(email=data.email, password=data.password)
     if not user:
         raise HttpError(status_code=400, message='Invalid credentials.')
     refresh = await sync_to_async(RefreshToken.for_user)(user)
     access = str(refresh.access_token)
-    response = Response({"access": access, "user":model_to_dict(user, fields=['id', 'email', 'first_name', 'last_name'])})
+    response = Response()
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
-    return response
+    return {"access": access, "user":user}
 
-# Google social login: frontend sends id_token (from Google Identity)
-class GoogleTokenIn(Schema):
-    id_token: str 
-
-@router.post("/google/", response=TokenOut)
-async def google_login(request: HttpRequest, data:GoogleTokenIn):
+@router.post("/google/", response=TokenSchema)
+async def google_login(request: HttpRequest, data:TokenSchema):
     try:
         # Verify the token with Google's public keys
         idinfo = await sync_to_async(google_id_token.verify_oauth2_token) \
-                        (data.id_token, 
+                        (data.access, 
                          google_requests.Request(), 
                          settings.GOOGLE_CLIENT_ID
                         )
@@ -88,18 +81,18 @@ async def google_login(request: HttpRequest, data:GoogleTokenIn):
         # Optionally set other fields if created
         refresh = await sync_to_async(RefreshToken.for_user)(user)
         access_token = str(refresh.access_token)
-        response = Response({"access": access_token, "user": model_to_dict(user, fields=['id', 'email', 'first_name', 'last_name'])})
+        response = Response()
         response.status_code = 200
         response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
-        return response
+        return {"access": access_token, "user": user}
     except Exception as e:
         # token invalid or verification failed
         raise HttpError(status_code=500, message=str(e))
 
 
 
-@router.post('/access_token', response=TokenIn)
-async def new_access_token(request: HttpRequest, data:TokenIn):
+@router.post('/access_token', response=TokenSchema)
+async def new_access_token(request: HttpRequest, data:TokenSchema):
     access_token = data.access
     #If the access token is not None, then we will check for its integrity, else we will raise a 401 Unauthorized error.
     if data.access:
@@ -109,12 +102,14 @@ async def new_access_token(request: HttpRequest, data:TokenIn):
             raise HttpError(status_code=400, message='Invalid Access Token')
         #generating new access token from the existing refresh token.
         try:
+            user_id = payload['user_id']
+            user = await User.objects.aget(id=user_id)
             refresh_token:str = request.get_signed_cookie('refresh_token', salt=settings.SALT)
             if not refresh_token:
                 raise HttpError(status_code=400, message='no refresh token, you are logged out.')
             try:
                 refresh_token = RefreshToken(refresh_token)
-                return {'access': str(refresh_token.access_token)}
+                return {'access': str(refresh_token.access_token), 'user':user}
             except Exception as e:
                 raise HttpError(status_code=400, message=str(e))
         #If there is no cookie named refresh_token, we will get the KeyError.
