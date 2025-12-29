@@ -15,7 +15,7 @@ from typing import Optional
 import jwt
 from jwt.exceptions import ExpiredSignatureError
 
-from utils import publish_email, generate_verification_token, confirm_verification_token
+from .utils import publish_email, generate_verification_token, confirm_verification_token
 
 router = Router()
 User = get_user_model()
@@ -157,9 +157,9 @@ async def logout(request: HttpRequest):
         response.status_code = 500
         return response
     
-@router.post("/verify/{token}")
-async def verify_mail(request:HttpRequest):
-    email = await sync_to_async(confirm_verification_token)
+@router.get("/verify/{token}")
+async def verify_mail(request:HttpRequest, token):
+    email = await sync_to_async(confirm_verification_token)(token)
     if email is not None:
         user = await User.objects.aget(email=email)
         user.email_verified = True
