@@ -1,22 +1,17 @@
-body{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-}
-
 .create-company-page{
+    position: fixed;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     gap: 20px;
     justify-content: center;
-    align-items: left;
     padding: 20px 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 500px;
     border-radius: 15px;
-    border: 1px solid gray;
+    border: 2px solid black;
 }
 
 .create-company-page p{

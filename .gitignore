@@ -30,3 +30,4 @@ __pycache__/
 city.json
 country.json
 main.py
+email_worker.py

@@ -27,6 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-f%04nig__k0e1vd4-8nq8vpl-1ve#d+z-2o-vtzy-3b&2pia26'
 SALT = 'HGIOEWG83U83T9I39jf3i3ut9mgm[gnoij(&(*&*&*^gjrgnkaioj@$#$%^&8tu383hthgiogheih38hg'
+SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT')
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -187,3 +188,12 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.google.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

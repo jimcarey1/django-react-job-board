@@ -15,6 +15,8 @@ from typing import Optional
 import jwt
 from jwt.exceptions import ExpiredSignatureError
 
+from utils import publish_email, generate_verification_token, confirm_verification_token
+
 router = Router()
 User = get_user_model()
 
@@ -23,6 +25,7 @@ class UserSchema(Schema):
     email:str
     first_name:str
     last_name:str
+    email_verified: bool
 
 class RegisterSchema(Schema):
     email: str
@@ -46,6 +49,17 @@ async def register(request: HttpRequest, data: RegisterSchema):
     user.set_password(data.password)
     await user.asave()
     refresh = await sync_to_async(RefreshToken.for_user)(user)
+
+    #Email verification section
+    token = await sync_to_async(generate_verification_token)(data.email)
+    verification_link = f'https://localhost:8000/verify/{token}'
+    payload = {
+                'to':data.email, 
+                'Subject':'Verification Email', 
+                'message': f'Please click on this link to verify your email: \n ${verification_link}'
+               }
+    await publish_email(payload)
+
     access = str(refresh.access_token)
     response = Response({"access": access, "user":UserSchema.from_orm(user)})
     response.set_signed_cookie('refresh_token', str(refresh), settings.SALT, max_age=7*24*60*60)
@@ -56,6 +70,16 @@ async def login(request: HttpRequest, data: LoginSchema):
     user = await aauthenticate(email=data.email, password=data.password)
     if not user:
         raise HttpError(status_code=400, message='Invalid credentials.')
+    if not user.email_verified:
+        #Email verification section
+        token = await sync_to_async(generate_verification_token)(data.email)
+        verification_link = f'https://localhost:8000/verify/{token}'
+        payload = {
+                    'to':data.email, 
+                    'Subject':'Verification Email', 
+                    'message': f'Please click on this link to verify your email: \n ${verification_link}'
+                }
+        await publish_email(payload)
     refresh = await sync_to_async(RefreshToken.for_user)(user)
     access = str(refresh.access_token)
     response = Response({"access":access, "user":UserSchema.from_orm(user)})
@@ -132,3 +156,11 @@ async def logout(request: HttpRequest):
         response = Response({"message" : "logout failed", "reason": str(e)})
         response.status_code = 500
         return response
+    
+@router.post("/verify/{token}")
+async def verify_mail(request:HttpRequest):
+    email = await sync_to_async(confirm_verification_token)
+    if email is not None:
+        user = await User.objects.aget(email=email)
+        user.email_verified = True
+        await user.asave()
