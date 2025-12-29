@@ -153,3 +153,11 @@ def get_jobs_posted_by_org(request:HttpRequest, organization:str):
         return jobs
     except ObjectDoesNotExist:
         raise HttpError(status_code=401, message='Not found')
+    
+@router.get('/jobs', response=List[JobSchema])
+def get_jobs(request:HttpRequest):
+    try:
+        jobs = Job.objects.select_related('organization').all().prefetch_related('skills')
+        return jobs
+    except Exception as e:
+        raise HttpError(status_code=500, message='Internal server Error')
