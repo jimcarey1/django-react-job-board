@@ -1,15 +1,18 @@
-const JobCard = ({job})=>{
+import '../css/jobcard.css'
+
+const JobCard = ({job, handleDescribeJob})=>{
     return(
         <div className="job-card">
-            <div className="">
-                <span className="title">{job.title}</span>
-                <span className="posted-by">Posted by {}</span>
+            <div className="job-info">
+                <span className='job-id'>{job.id}</span>
+                <span className="title" onClick={handleDescribeJob}>{job.title}</span>
+                <span className="posted-by">Posted by <span className='org-name'>{job.organization.title}</span></span>
             </div>
             <div className="description">
-                <p>A description that only shows the first 30 words.</p>
+                <p>{job.description}</p>
             </div>
             <div className="ctc">
-                <span>ctc</span>
+                <span>Provided ctc: <span className='ctc-number'>{job.ctc}</span></span>
             </div>
         </div>
     )
