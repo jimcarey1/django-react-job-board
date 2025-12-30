@@ -2,6 +2,7 @@ from ninja import Router
 from ninja import Schema
 from ninja.responses import Response
 from ninja.errors import HttpError
+from ninja.pagination import paginate, PageNumberPagination
 from django.http import HttpRequest
 from django.forms import model_to_dict
 from django.contrib.auth import get_user_model
@@ -155,9 +156,10 @@ def get_jobs_posted_by_org(request:HttpRequest, organization:str):
         raise HttpError(status_code=401, message='Not found')
     
 @router.get('/jobs', response=List[JobSchema])
+@paginate(PageNumberPagination, page_size=10)
 def get_jobs(request:HttpRequest):
     try:
-        jobs = Job.objects.select_related('organization').all().prefetch_related('skills')
+        jobs = Job.objects.select_related('organization').all().prefetch_related('skills').order_by('id')
         return jobs
     except Exception as e:
         raise HttpError(status_code=500, message='Internal server Error')
