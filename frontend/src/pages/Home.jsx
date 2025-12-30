@@ -12,11 +12,12 @@ const accessToken = localStorage.getItem('access')
 const Home = ()=>{
     const [jobs, setJobs] = useState([])
     const [selectedJob, setSelectedJob] = useState(null)
+    const [currentPage, setCurrentPage] = useState(1)
     const describeJobRef = useRef(null)
     useEffect(()=>{
         const fetchJobs = async ()=>{
             try{
-                const response = await fetch('http://localhost:8000/api/company/jobs', {
+                const response = await fetch(`http://localhost:8000/api/company/jobs?page=${currentPage}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type':'application/json',
@@ -26,9 +27,8 @@ const Home = ()=>{
                 })
                 if(response.ok){
                     try{
-                        const jobs = await response.json()
-                        console.log(jobs)
-                        setJobs(jobs)
+                        const data = await response.json()
+                        setJobs(data.items)
                     }catch(error){
                         console.log(error)
                     }
@@ -38,7 +38,7 @@ const Home = ()=>{
             }
         }
         fetchJobs()
-    }, [])
+    }, [currentPage])
 
     const handleDescribeJob = (event)=>{
         const jobIdElement = event.target.previousElementSibling
@@ -56,6 +56,7 @@ const Home = ()=>{
                     {jobs.map((job)=>(
                         <JobCard key={job.id} job={job} handleDescribeJob={handleDescribeJob}/>
                     ))}
+                    <button className='next-page-button' onClick={()=>setCurrentPage((page)=>page+1)}>Next</button>
                 </div>
                 <div className='describe-job' ref={describeJobRef}>
                     {describeJobRef.current && selectedJob &&
