@@ -1,0 +1,84 @@
+.job-page{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.job-page .job-details{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.job-details .basic-info{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-self: center;
+}
+
+.job-details .basic-info .job-title{
+    color: green;
+    font-weight: bolder;
+    font-size: 24px;
+}
+
+.job-details .basic-info .posted-by{
+    color: rgb(52, 51, 51);
+    font-size: 16px;
+    font-style: italic;
+}
+
+.basic-info .posted-by .org-title{
+    font-weight: bolder;
+    font-style: normal;
+    color: blue;
+}
+
+.job-details .job-desc{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.job-details .job-desc .job-desc-heading{
+    font-size: 22px;
+    text-decoration: underline;
+    font-weight: bolder;
+}
+
+.job-details .skills{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.job-details .skills .req-skills-heading{
+    font-size: 22px;
+    text-decoration: underline;
+    font-weight: bolder;
+}
+
+.job-details .experience{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.job-details .experience .req-experience-heading{
+    font-size: 22px;
+    text-decoration: underline;
+    font-weight: bolder;
+}
+
+.job-details .ctc{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.job-details .ctc .provided-ctc-heading{
+    font-size: 22px;
+    text-decoration: underline;
+    font-weight: bolder;
+}
